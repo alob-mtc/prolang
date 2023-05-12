@@ -31,6 +31,3 @@ const RBRACE: &str = "}";
 const FUNCTION: &str = "FUNCTION";
 const LET: &str = "LET";
 const TRUE: &str = "TRUE";
-
-
-let keywords: std::Hashmap = std::hashmap::from()
