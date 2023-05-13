@@ -56,21 +56,24 @@ impl Lexer {
             _ => {
                 if is_letter(self.ch) {
                     tok.literal = self.read_indentifier();
-                    tok.token_type = Token::lookup_ident(&tok.literal)
+                    tok.token_type = Token::lookup_ident(&tok.literal);
+                    return tok;
                 } else if is_digit(self.ch) {
                     tok.literal = self.read_number();
-                    tok.token_type = TokenType::INT
+                    tok.token_type = TokenType::INT;
+                    return tok;
                 } else {
                     tok = Token::new(TokenType::ILLEGAL, self.ch)
                 }
             }
         }
 
+        self.read_char();
         return tok;
     }
 
     fn skip_whitespace(&mut self) {
-        while self.ch == '\0' || self.ch == '\t' || self.ch == '\n' || self.ch == '\r' {
+        while self.ch == '\t' || self.ch == '\n' || self.ch == '\r' || self.ch == ' ' {
             self.read_char()
         }
     }
@@ -107,7 +110,184 @@ mod tests {
     use super::*;
 
     #[test]
-    fn t() {
-        assert_eq!(1, 1)
+    fn test_next_token() {
+        let input = "
+        let five = 5;
+        let ten = 10;
+        let add = fn(x, y) {
+            x + y;
+        };
+        let result = add(five, ten);
+        ";
+        struct test_case {
+            expected_type: TokenType,
+            expecred_literal: String,
+        }
+
+        let tests = [
+            test_case {
+                expected_type: TokenType::LET,
+                expecred_literal: "let".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::IDENT,
+                expecred_literal: "five".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::ASSIGN,
+                expecred_literal: "=".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::INT,
+                expecred_literal: "5".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::SEMICOLON,
+                expecred_literal: ";".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::LET,
+                expecred_literal: "let".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::IDENT,
+                expecred_literal: "ten".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::ASSIGN,
+                expecred_literal: "=".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::INT,
+                expecred_literal: "10".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::SEMICOLON,
+                expecred_literal: ";".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::LET,
+                expecred_literal: "let".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::IDENT,
+                expecred_literal: "add".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::ASSIGN,
+                expecred_literal: "=".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::FUNCTION,
+                expecred_literal: "fn".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::LPAREN,
+                expecred_literal: "(".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::IDENT,
+                expecred_literal: "x".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::COMMA,
+                expecred_literal: ",".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::IDENT,
+                expecred_literal: "y".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::RPAREN,
+                expecred_literal: ")".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::LBRACE,
+                expecred_literal: "{".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::IDENT,
+                expecred_literal: "x".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::PLUS,
+                expecred_literal: "+".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::IDENT,
+                expecred_literal: "y".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::SEMICOLON,
+                expecred_literal: ";".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::RBRACE,
+                expecred_literal: "}".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::SEMICOLON,
+                expecred_literal: ";".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::LET,
+                expecred_literal: "let".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::IDENT,
+                expecred_literal: "result".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::ASSIGN,
+                expecred_literal: "=".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::IDENT,
+                expecred_literal: "add".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::LPAREN,
+                expecred_literal: "(".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::IDENT,
+                expecred_literal: "five".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::COMMA,
+                expecred_literal: ",".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::IDENT,
+                expecred_literal: "ten".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::RPAREN,
+                expecred_literal: ")".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::SEMICOLON,
+                expecred_literal: ";".to_string(),
+            },
+            test_case {
+                expected_type: TokenType::EOF,
+                expecred_literal: "".to_string(),
+            },
+        ];
+
+        let mut l = Lexer::new(input.to_owned());
+        for tt in tests {
+            let tok = l.next_token();
+            assert_eq!(
+                tok.token_type, tt.expected_type,
+                "test - tokentype wrong. extected={:?}, got={:?} - literal: {}",
+                tok.token_type, tt.expected_type, tok.literal,
+            );
+            assert_eq!(
+                tok.literal, tt.expecred_literal,
+                "test - literal wrong. extected={}, got={}",
+                tok.literal, tt.expecred_literal,
+            )
+        }
     }
 }
