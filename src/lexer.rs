@@ -64,7 +64,7 @@ impl Lexer {
                     self.read_char();
                     let mut literal = String::from(ch);
                     literal.push(self.ch);
-                    tok = Token::new(TokenType::NOT_EQ, literal);
+                    tok = Token::new(TokenType::NotEq, literal);
                 } else {
                     tok = Token::new(TokenType::BANG, self.ch.to_string());
                 }

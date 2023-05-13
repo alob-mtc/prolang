@@ -14,7 +14,7 @@ pub enum TokenType {
     ASTERISK,
     SLASH,
     EQ,
-    NOT_EQ,
+    NotEq,
 
     LT,
     GT,
