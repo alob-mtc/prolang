@@ -1,4 +1,6 @@
-enum TokenType {
+#[derive(Default)]
+pub enum TokenType {
+    #[default]
     ILLEGAL,
     EOF,
     // Identifiers + literals
@@ -27,17 +29,49 @@ enum TokenType {
     FUNCTION,
     LET,
     TRUE,
+    FALSE,
+    IF,
+    ELSE,
+    RETURN,
 }
 
-fn lookup_ident(ident: &str) -> TokenType {
+pub fn lookup_ident(ident: &str) -> TokenType {
     match ident {
         "fn" => return TokenType::FUNCTION,
         "let" => return TokenType::LET,
+        "true" => return TokenType::TRUE,
+        "false" => return TokenType::FALSE,
+        "if" => return TokenType::IF,
+        "else" => return TokenType::ELSE,
+        "return" => return TokenType::RETURN,
         _ => return TokenType::IDENT,
     }
 }
 
-struct Token {
-    token_type: TokenType,
-    literal: char,
+#[derive(Default)]
+pub struct Token {
+    pub token_type: TokenType,
+    pub literal: String,
+}
+
+impl Token {
+    pub fn new(token_type: TokenType, ch: char) -> Token {
+        Token {
+            token_type,
+            literal: ch.to_string(),
+        }
+    }
+
+    pub fn lookup_ident(ident: &str) -> TokenType {
+        match ident {
+            "fn" => return TokenType::FUNCTION,
+            "let" => return TokenType::LET,
+            "true" => return TokenType::TRUE,
+            "false" => return TokenType::FALSE,
+            "if" => return TokenType::IF,
+            "else" => return TokenType::ELSE,
+            "return" => return TokenType::RETURN,
+            _ => return TokenType::IDENT,
+        }
+    }
 }
