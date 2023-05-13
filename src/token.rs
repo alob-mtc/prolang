@@ -1,33 +1,43 @@
+enum TokenType {
+    ILLEGAL,
+    EOF,
+    // Identifiers + literals
+    IDENT,
+    INT,
+    // Operators
+    ASSIGN,
+    PLUS,
+    MINUS,
+    BANG,
+    ASTERISK,
+    SLASH,
 
+    LT,
+    GT,
+    // Delimiters
+    COMMA,
+    SEMICOLON,
 
-const ILLEGAL: &str = "ILLEGAL";
-const EOF: &str = "EOF";
-// Identifiers + literals
-const IDENT: &str = "IDENT";
-const INT: &str = "INT";
-// Operators
-const ASSIGN: &str = "=";
-const PLUS: &str = "+";
-const MINUS: &str = "-";
-const BANG: &str = "!";
-const ASTERISK: &str = "*";
-const SLASH: &str = "/";
+    LPAREN,
+    RPAREN,
+    LBRACE,
+    RBRACE,
 
+    // Keywords
+    FUNCTION,
+    LET,
+    TRUE,
+}
 
-const LT: &str = "<";
-const GT: &str = ">";
+fn lookup_ident(ident: &str) -> TokenType {
+    match ident {
+        "fn" => return TokenType::FUNCTION,
+        "let" => return TokenType::LET,
+        _ => return TokenType::IDENT,
+    }
+}
 
-// Delimiters
-const COMMA: &str = ",";
-const SEMICOLON: &str = ";";
-
-
-const LPAREN: &str = "(";
-const RPAREN: &str = ")";
-const LBRACE: &str = "{";
-const RBRACE: &str = "}";
-
-// Keywords
-const FUNCTION: &str = "FUNCTION";
-const LET: &str = "LET";
-const TRUE: &str = "TRUE";
+struct Token {
+    token_type: TokenType,
+    literal: char,
+}
