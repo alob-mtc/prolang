@@ -32,26 +32,53 @@ impl Lexer {
         self.read_position += 1;
     }
 
+    fn peek_char(&self) -> char {
+        if self.read_position >= self.input.len() {
+            return '\0';
+        }
+        self.input.chars().nth(self.read_position).unwrap()
+    }
+
     fn next_token(&mut self) -> Token {
         let mut tok = Token::default();
 
         self.skip_whitespace();
 
         match self.ch {
-            '=' => tok = Token::new(TokenType::ASSIGN, self.ch),
-            '+' => tok = Token::new(TokenType::PLUS, self.ch),
-            '-' => tok = Token::new(TokenType::MINUS, self.ch),
-            '!' => tok = Token::new(TokenType::BANG, self.ch),
-            '/' => tok = Token::new(TokenType::SLASH, self.ch),
-            '*' => tok = Token::new(TokenType::ASTERISK, self.ch),
-            '<' => tok = Token::new(TokenType::LT, self.ch),
-            '>' => tok = Token::new(TokenType::GT, self.ch),
-            ';' => tok = Token::new(TokenType::SEMICOLON, self.ch),
-            ',' => tok = Token::new(TokenType::COMMA, self.ch),
-            '(' => tok = Token::new(TokenType::LPAREN, self.ch),
-            ')' => tok = Token::new(TokenType::RPAREN, self.ch),
-            '{' => tok = Token::new(TokenType::LBRACE, self.ch),
-            '}' => tok = Token::new(TokenType::RBRACE, self.ch),
+            '=' => {
+                if self.peek_char() == '=' {
+                    let ch = self.ch;
+                    self.read_char();
+                    let mut literal = String::from(ch);
+                    literal.push(self.ch);
+                    tok = Token::new(TokenType::EQ, literal);
+                } else {
+                    tok = Token::new(TokenType::ASSIGN, self.ch.to_string());
+                }
+            }
+            '+' => tok = Token::new(TokenType::PLUS, self.ch.to_string()),
+            '-' => tok = Token::new(TokenType::MINUS, self.ch.to_string()),
+            '!' => {
+                if self.peek_char() == '=' {
+                    let ch = self.ch;
+                    self.read_char();
+                    let mut literal = String::from(ch);
+                    literal.push(self.ch);
+                    tok = Token::new(TokenType::NOT_EQ, literal);
+                } else {
+                    tok = Token::new(TokenType::BANG, self.ch.to_string());
+                }
+            }
+            '/' => tok = Token::new(TokenType::SLASH, self.ch.to_string()),
+            '*' => tok = Token::new(TokenType::ASTERISK, self.ch.to_string()),
+            '<' => tok = Token::new(TokenType::LT, self.ch.to_string()),
+            '>' => tok = Token::new(TokenType::GT, self.ch.to_string()),
+            ';' => tok = Token::new(TokenType::SEMICOLON, self.ch.to_string()),
+            ',' => tok = Token::new(TokenType::COMMA, self.ch.to_string()),
+            '(' => tok = Token::new(TokenType::LPAREN, self.ch.to_string()),
+            ')' => tok = Token::new(TokenType::RPAREN, self.ch.to_string()),
+            '{' => tok = Token::new(TokenType::LBRACE, self.ch.to_string()),
+            '}' => tok = Token::new(TokenType::RBRACE, self.ch.to_string()),
             '\0' => tok.token_type = TokenType::EOF,
             _ => {
                 if is_letter(self.ch) {
@@ -63,7 +90,7 @@ impl Lexer {
                     tok.token_type = TokenType::INT;
                     return tok;
                 } else {
-                    tok = Token::new(TokenType::ILLEGAL, self.ch)
+                    tok = Token::new(TokenType::ILLEGAL, self.ch.to_string())
                 }
             }
         }

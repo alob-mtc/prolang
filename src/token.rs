@@ -13,6 +13,8 @@ pub enum TokenType {
     BANG,
     ASTERISK,
     SLASH,
+    EQ,
+    NOT_EQ,
 
     LT,
     GT,
@@ -55,10 +57,10 @@ pub struct Token {
 }
 
 impl Token {
-    pub fn new(token_type: TokenType, ch: char) -> Token {
+    pub fn new(token_type: TokenType, ch: String) -> Token {
         Token {
             token_type,
-            literal: ch.to_string(),
+            literal: ch,
         }
     }
 
