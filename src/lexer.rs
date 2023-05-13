@@ -12,7 +12,7 @@ impl Lexer {
         let mut l = Lexer {
             input,
             position: 0,
-            read_position: 1,
+            read_position: 0,
             ch: '\0',
         };
 
@@ -39,7 +39,7 @@ impl Lexer {
         self.input.chars().nth(self.read_position).unwrap()
     }
 
-    fn next_token(&mut self) -> Token {
+    pub fn next_token(&mut self) -> Token {
         let mut tok = Token::default();
 
         self.skip_whitespace();
@@ -138,8 +138,7 @@ mod tests {
 
     #[test]
     fn test_next_token() {
-        let input = "
-        let five = 5;
+        let input = "let five = 5;
         let ten = 10;
         let add = fn(x, y) {
             x + y;
