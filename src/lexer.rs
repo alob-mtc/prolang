@@ -145,157 +145,157 @@ mod tests {
         };
         let result = add(five, ten);
         ";
-        struct test_case {
+        struct TestCase {
             expected_type: TokenType,
             expecred_literal: String,
         }
 
         let tests = [
-            test_case {
+            TestCase {
                 expected_type: TokenType::LET,
                 expecred_literal: "let".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::IDENT,
                 expecred_literal: "five".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::ASSIGN,
                 expecred_literal: "=".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::INT,
                 expecred_literal: "5".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::SEMICOLON,
                 expecred_literal: ";".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::LET,
                 expecred_literal: "let".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::IDENT,
                 expecred_literal: "ten".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::ASSIGN,
                 expecred_literal: "=".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::INT,
                 expecred_literal: "10".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::SEMICOLON,
                 expecred_literal: ";".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::LET,
                 expecred_literal: "let".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::IDENT,
                 expecred_literal: "add".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::ASSIGN,
                 expecred_literal: "=".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::FUNCTION,
                 expecred_literal: "fn".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::LPAREN,
                 expecred_literal: "(".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::IDENT,
                 expecred_literal: "x".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::COMMA,
                 expecred_literal: ",".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::IDENT,
                 expecred_literal: "y".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::RPAREN,
                 expecred_literal: ")".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::LBRACE,
                 expecred_literal: "{".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::IDENT,
                 expecred_literal: "x".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::PLUS,
                 expecred_literal: "+".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::IDENT,
                 expecred_literal: "y".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::SEMICOLON,
                 expecred_literal: ";".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::RBRACE,
                 expecred_literal: "}".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::SEMICOLON,
                 expecred_literal: ";".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::LET,
                 expecred_literal: "let".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::IDENT,
                 expecred_literal: "result".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::ASSIGN,
                 expecred_literal: "=".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::IDENT,
                 expecred_literal: "add".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::LPAREN,
                 expecred_literal: "(".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::IDENT,
                 expecred_literal: "five".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::COMMA,
                 expecred_literal: ",".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::IDENT,
                 expecred_literal: "ten".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::RPAREN,
                 expecred_literal: ")".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::SEMICOLON,
                 expecred_literal: ";".to_string(),
             },
-            test_case {
+            TestCase {
                 expected_type: TokenType::EOF,
                 expecred_literal: "".to_string(),
             },

@@ -14,7 +14,8 @@ pub fn start() {
         io::stdin().read_line(&mut input).unwrap();
         let mut l = Lexer::new(input.trim().to_string());
 
-        while let tok = l.next_token() {
+        loop {
+            let tok = l.next_token();
             if tok.token_type == TokenType::EOF {
                 break;
             }

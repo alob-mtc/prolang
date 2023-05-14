@@ -37,19 +37,6 @@ pub enum TokenType {
     RETURN,
 }
 
-pub fn lookup_ident(ident: &str) -> TokenType {
-    match ident {
-        "fn" => return TokenType::FUNCTION,
-        "let" => return TokenType::LET,
-        "true" => return TokenType::TRUE,
-        "false" => return TokenType::FALSE,
-        "if" => return TokenType::IF,
-        "else" => return TokenType::ELSE,
-        "return" => return TokenType::RETURN,
-        _ => return TokenType::IDENT,
-    }
-}
-
 #[derive(Default, Debug)]
 pub struct Token {
     pub token_type: TokenType,
