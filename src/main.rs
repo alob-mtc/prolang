@@ -1,7 +1,6 @@
 use std::env;
 mod lexer;
 mod repl;
-mod token;
 
 fn main() {
     let usr = env::var("USER").unwrap();
