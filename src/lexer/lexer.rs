@@ -1,4 +1,4 @@
-use super::token::{Token, TokenType};
+use super::token::{lookup_ident, Token, TokenType};
 
 pub struct Lexer {
     input: String,
@@ -83,7 +83,7 @@ impl Lexer {
             _ => {
                 if is_letter(self.ch) {
                     tok.literal = self.read_indentifier();
-                    tok.token_type = Token::lookup_ident(&tok.literal);
+                    tok.token_type = lookup_ident(&tok.literal);
                     return tok;
                 } else if is_digit(self.ch) {
                     tok.literal = self.read_number();
@@ -131,4 +131,3 @@ fn is_letter(ch: char) -> bool {
 fn is_digit(ch: char) -> bool {
     '0' <= ch && ch <= '9'
 }
-

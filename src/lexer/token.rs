@@ -43,24 +43,24 @@ pub struct Token {
     pub literal: String,
 }
 
+pub fn lookup_ident(ident: &str) -> TokenType {
+    match ident {
+        "fn" => return TokenType::FUNCTION,
+        "let" => return TokenType::LET,
+        "true" => return TokenType::TRUE,
+        "false" => return TokenType::FALSE,
+        "if" => return TokenType::IF,
+        "else" => return TokenType::ELSE,
+        "return" => return TokenType::RETURN,
+        _ => return TokenType::IDENT,
+    }
+}
+
 impl Token {
     pub fn new(token_type: TokenType, ch: String) -> Token {
         Token {
             token_type,
             literal: ch,
-        }
-    }
-
-    pub fn lookup_ident(ident: &str) -> TokenType {
-        match ident {
-            "fn" => return TokenType::FUNCTION,
-            "let" => return TokenType::LET,
-            "true" => return TokenType::TRUE,
-            "false" => return TokenType::FALSE,
-            "if" => return TokenType::IF,
-            "else" => return TokenType::ELSE,
-            "return" => return TokenType::RETURN,
-            _ => return TokenType::IDENT,
         }
     }
 }
