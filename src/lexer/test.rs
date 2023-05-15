@@ -174,6 +174,150 @@ fn test_next_token() {
             expecred_literal: "!".to_string(),
         },
         TestCase {
+            expected_type: TokenType::MINUS,
+            expecred_literal: "-".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::SLASH,
+            expecred_literal: "/".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::ASTERISK,
+            expecred_literal: "*".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::INT,
+            expecred_literal: "5".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::SEMICOLON,
+            expecred_literal: ";".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::INT,
+            expecred_literal: "5".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::LT,
+            expecred_literal: "<".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::INT,
+            expecred_literal: "10".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::GT,
+            expecred_literal: ">".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::INT,
+            expecred_literal: "5".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::SEMICOLON,
+            expecred_literal: ";".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::IF,
+            expecred_literal: "if".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::LPAREN,
+            expecred_literal: "(".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::INT,
+            expecred_literal: "5".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::LT,
+            expecred_literal: "<".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::INT,
+            expecred_literal: "10".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::RPAREN,
+            expecred_literal: ")".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::LBRACE,
+            expecred_literal: "{".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::RETURN,
+            expecred_literal: "return".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::TRUE,
+            expecred_literal: "true".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::SEMICOLON,
+            expecred_literal: ";".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::RBRACE,
+            expecred_literal: "}".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::ELSE,
+            expecred_literal: "else".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::LBRACE,
+            expecred_literal: "{".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::RETURN,
+            expecred_literal: "return".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::FALSE,
+            expecred_literal: "false".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::SEMICOLON,
+            expecred_literal: ";".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::RBRACE,
+            expecred_literal: "}".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::INT,
+            expecred_literal: "10".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::EQ,
+            expecred_literal: "==".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::INT,
+            expecred_literal: "10".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::SEMICOLON,
+            expecred_literal: ";".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::INT,
+            expecred_literal: "10".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::NotEq,
+            expecred_literal: "!=".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::INT,
+            expecred_literal: "9".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::SEMICOLON,
+            expecred_literal: ";".to_string(),
+        },
+        TestCase {
             expected_type: TokenType::EOF,
             expecred_literal: "".to_string(),
         },
@@ -184,7 +328,7 @@ fn test_next_token() {
         let tok = l.next_token();
         assert_eq!(
             tok.token_type, tt.expected_type,
-            "test - tokentype wrong. extected={:?}, got={:?} - literal: {}",
+            "test - tokentype wrong. extected={:?}, got={:?} - literal_e: {}",
             tok.token_type, tt.expected_type, tok.literal,
         );
         assert_eq!(
