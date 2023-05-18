@@ -4,7 +4,11 @@ pub trait Node {
     fn token_literal(&self) -> String;
 }
 
-pub trait Statement: Node {}
+pub trait Statement: Node {
+    fn get_let(&self) -> Option<&LetStatement> {
+        None
+    }
+}
 
 pub trait Expression: Node {}
 
@@ -33,7 +37,11 @@ impl Node for LetStatement {
     }
 }
 
-impl Statement for LetStatement {}
+impl Statement for LetStatement {
+    fn get_let(&self) -> Option<&LetStatement> {
+        Some(self)
+    }
+}
 
 #[derive(Default)]
 pub struct Identifier {

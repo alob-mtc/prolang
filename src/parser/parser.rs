@@ -11,7 +11,7 @@ struct Parser {
 
 impl Parser {
     pub fn new(l: Lexer) -> Parser {
-        let mut p = Parser {
+        let p = Parser {
             l,
             cur_token: Token::default(),
             peek_token: Token::default(),
@@ -91,7 +91,10 @@ impl Parser {
 #[cfg(test)]
 mod test {
     use super::Parser;
-    use crate::{lexer::lexer::Lexer, parser::ast::Statement};
+    use crate::{
+        lexer::lexer::Lexer,
+        parser::ast::{Node, Statement},
+    };
 
     #[test]
     fn test_let_statement() {
@@ -136,12 +139,25 @@ mod test {
         }
     }
 
-    fn let_statemnt(s: &Box<dyn Statement>, _name: String) {
+    fn let_statemnt(s: &Box<dyn Statement>, name: String) {
         assert_eq!(
             s.token_literal(),
             "let",
             "s.token_literal not 'let' got={}",
             s.token_literal()
+        );
+        let let_stmt = s.get_let().unwrap();
+        assert_eq!(
+            let_stmt.name.value, name,
+            "letStmt.Name.Value not '{}'. got={}",
+            name, let_stmt.name.value
+        );
+        assert_eq!(
+            let_stmt.name.token_literal(),
+            name,
+            "letStmt.Name.Value not '{}'. got={}",
+            name,
+            let_stmt.name.value
         )
     }
 }
