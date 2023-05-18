@@ -1,4 +1,4 @@
-use crate::lexer::token::Token;
+use crate::lexer::token::{Token, TokenType};
 
 pub trait Node {
     fn token_literal(&self) -> String;
@@ -61,5 +61,18 @@ impl Expression for ExpressionDefault {}
 impl Node for ExpressionDefault {
     fn token_literal(&self) -> String {
         todo!()
+    }
+}
+
+pub struct ReturnStatemnt {
+    token: Token,
+    return_value: Box<dyn Expression>,
+}
+
+impl Statement for ReturnStatemnt {}
+
+impl Node for ReturnStatemnt {
+    fn token_literal(&self) -> String {
+        self.token.literal.to_owned()
     }
 }

@@ -44,6 +44,7 @@ impl Parser {
     fn parse_statement(&mut self) -> Option<Box<dyn Statement>> {
         match self.cur_token.token_type {
             TokenType::LET => self.parse_let_statement(),
+            TokenType::RETURN => self.parse_return_statement(),
             _ => None,
         }
     }
@@ -68,6 +69,23 @@ impl Parser {
         if !self.expect_peek(TokenType::ASSIGN) {
             return None;
         }
+
+        // TODO: skipping the expressions until we encounter ;
+        while !self.cur_token_is(TokenType::SEMICOLON) {
+            self.next_token()
+        }
+
+        Some(Box::new(stmt))
+    }
+
+    fn parse_return_statement(&mut self) -> Option<Box<dyn Statement>> {
+        let stmt = LetStatement {
+            token: self.cur_token.clone(),
+            value: Box::new(ExpressionDefault {}),
+            name: Identifier::default(),
+        };
+
+        self.next_token();
 
         // TODO: skipping the expressions until we encounter ;
         while !self.cur_token_is(TokenType::SEMICOLON) {
@@ -153,6 +171,36 @@ mod test {
             let stmt = program.statements.get(i).unwrap();
             let_statemnt(stmt, tt.expected_identifier);
             i += 1;
+        }
+    }
+
+    #[test]
+    fn test_return_statement() {
+        let input = "
+        return 5;
+        return 10;
+        return 993322;
+        ";
+
+        let l = Lexer::new(input.to_string());
+        let mut p = Parser::new(l);
+
+        let program = p.parse_program().expect("parse_program() return none");
+        assert_eq!(chack_parser_errors(&p), false);
+        assert_eq!(
+            program.statements.len(),
+            3,
+            "program.statements does not contain 3 statements. got={}",
+            program.statements.len()
+        );
+
+        for stmt in program.statements {
+            assert_eq!(
+                stmt.token_literal(),
+                "return",
+                "return_stmt.token_literal not 'return', got {}",
+                stmt.token_literal()
+            )
         }
     }
 
