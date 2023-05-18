@@ -1,3 +1,5 @@
+use std::fmt::format;
+
 use crate::lexer::lexer::Lexer;
 use crate::lexer::token::{Token, TokenType};
 
@@ -5,6 +7,7 @@ use super::ast::{ExpressionDefault, Identifier, LetStatement, Program, Statement
 
 struct Parser {
     l: Lexer,
+    errors: Vec<String>,
     cur_token: Token,
     peek_token: Token,
 }
@@ -13,6 +16,7 @@ impl Parser {
     pub fn new(l: Lexer) -> Parser {
         let p = Parser {
             l,
+            errors: vec![],
             cur_token: Token::default(),
             peek_token: Token::default(),
         };
@@ -27,7 +31,7 @@ impl Parser {
 
     pub fn parse_program(&mut self) -> Option<Program> {
         let mut program = Program { statements: vec![] };
-        while self.cur_token.token_type != TokenType::EOF {
+        while !self.cur_token_is(TokenType::EOF) {
             if let Some(stmt) = self.parse_statement() {
                 program.statements.push(stmt);
             }
@@ -76,15 +80,27 @@ impl Parser {
     fn cur_token_is(&self, t: TokenType) -> bool {
         self.cur_token.token_type == t
     }
-    fn peek_token_is(&self, t: TokenType) -> bool {
-        self.peek_token.token_type == t
+    fn peek_token_is(&self, t: &TokenType) -> bool {
+        self.peek_token.token_type == *t
     }
     fn expect_peek(&mut self, t: TokenType) -> bool {
-        if self.peek_token_is(t) {
+        if self.peek_token_is(&t) {
             self.next_token();
             return true;
         }
+        self.peek_error(&t);
         return false;
+    }
+
+    pub fn errors(&self) -> &Vec<String> {
+        &self.errors
+    }
+    fn peek_error(&mut self, t: &TokenType) {
+        let msg = format(format_args!(
+            "expected next token to be {:?}, got {:?} instead",
+            t, self.peek_token.token_type,
+        ));
+        self.errors.push(msg)
     }
 }
 
@@ -108,6 +124,7 @@ mod test {
         let mut p = Parser::new(l);
 
         let program = p.parse_program().expect("parse_program() return none");
+        assert_eq!(chack_parser_errors(&p), false);
         assert_eq!(
             program.statements.len(),
             3,
@@ -159,5 +176,18 @@ mod test {
             name,
             let_stmt.name.value
         )
+    }
+
+    fn chack_parser_errors(p: &Parser) -> bool {
+        let errs: &Vec<String> = p.errors();
+        if errs.len() == 0 {
+            return false;
+        }
+        println!("parser has errors: {}", errs.len());
+        for err in errs {
+            println!("parser error: {}", err)
+        }
+
+        return true;
     }
 }
