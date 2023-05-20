@@ -1,4 +1,4 @@
-use crate::lexer::token::{Token, TokenType};
+use crate::lexer::token::Token;
 
 pub trait Node {
     fn token_literal(&self) -> String;

@@ -148,8 +148,6 @@ myHash["age"]  // 72
 
 ### TODO
 
-[ ] - Type system
-
-[ ] - GC
-
-[ ] - Error handling
+[] - Type system
+[] - GC
+[] - Error handling
