@@ -113,7 +113,7 @@ let reduce = fn(arr, initial, f) {
         if (len(arr) == 0) {
             result
         } else {
-            iter(rest(arr), f(result, first(arr)));
+            iter(rest(arr), f(result, arr[0]));
         }
     };
     iter(arr, initial);
