@@ -146,7 +146,7 @@ myHash["age"]  // 72
 
 ```
 
-### TODO
+### TODO:
 
 - [] Type system
 - [] GC
