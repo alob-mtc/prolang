@@ -3,7 +3,7 @@ use std::fmt::format;
 use crate::lexer::lexer::Lexer;
 use crate::lexer::token::{Token, TokenType};
 
-use super::ast::{ExpressionDefault, Identifier, LetStatement, Program, Statement};
+use super::ast::{Identifier, LetStatement, Program, Statement};
 
 struct Parser {
     l: Lexer,
@@ -52,7 +52,7 @@ impl Parser {
     fn parse_let_statement(&mut self) -> Option<Box<dyn Statement>> {
         let mut stmt = LetStatement {
             token: self.cur_token.clone(),
-            value: Box::new(ExpressionDefault {}),
+            value: None,
             name: Identifier::default(),
         };
 
@@ -81,7 +81,7 @@ impl Parser {
     fn parse_return_statement(&mut self) -> Option<Box<dyn Statement>> {
         let stmt = LetStatement {
             token: self.cur_token.clone(),
-            value: Box::new(ExpressionDefault {}),
+            value: None,
             name: Identifier::default(),
         };
 
