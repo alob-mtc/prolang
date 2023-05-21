@@ -106,14 +106,14 @@ impl Parser {
             self.next_token();
             return true;
         }
-        self.peek_error(&t);
+        self.peek_error(t);
         return false;
     }
 
     pub fn errors(&self) -> &Vec<String> {
         &self.errors
     }
-    fn peek_error(&mut self, t: &TokenType) {
+    fn peek_error(&mut self, t: TokenType) {
         let msg = format(format_args!(
             "expected next token to be {:?}, got {:?} instead",
             t, self.peek_token.token_type,

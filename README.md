@@ -132,7 +132,7 @@ for {
 
 let x = 0;
 for (x < 10) {
-    x++;
+    x = x + 1;  // TODO: implement "+=", "-="
 };
 
 for (i in 0..10) {
