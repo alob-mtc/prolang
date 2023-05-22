@@ -18,7 +18,8 @@ fn test_next_token() {
             return false;
         }
         10 == 10; 10 != 9;
-        ";
+        "
+    .to_string();
     struct TestCase {
         expected_type: TokenType,
         expecred_literal: String,
@@ -323,7 +324,7 @@ fn test_next_token() {
         },
     ];
 
-    let mut l = Lexer::new(input.to_string());
+    let mut l = Lexer::new(input);
     for tt in tests {
         let tok = l.next_token();
         assert_eq!(

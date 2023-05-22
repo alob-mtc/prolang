@@ -210,9 +210,10 @@ mod test {
         let x = 5;
         let y = 10;
         let foobar = 838383;
-        ";
+        "
+        .to_string();
 
-        let l = Lexer::new(input.to_string());
+        let l = Lexer::new(input);
         let mut p = Parser::new(l);
 
         let program = p.parse_program().expect("parse_program() return none");
@@ -254,9 +255,10 @@ mod test {
         return 5;
         return 10;
         return 993322;
-        ";
+        "
+        .to_string();
 
-        let l = Lexer::new(input.to_string());
+        let l = Lexer::new(input);
         let mut p = Parser::new(l);
 
         let program = p.parse_program().expect("parse_program() return none");
@@ -280,9 +282,9 @@ mod test {
 
     #[test]
     fn test_identifier_expression() {
-        let input = "foobar;";
+        let input = "foobar;".to_string();
 
-        let l = Lexer::new(input.to_string());
+        let l = Lexer::new(input);
         let mut p = Parser::new(l);
         let program = p.parse_program().expect("parse_program() return none");
 
@@ -326,9 +328,9 @@ mod test {
 
     #[test]
     fn test_integer_literal_expression() {
-        let input = "5;";
+        let input = "5;".to_string();
 
-        let l = Lexer::new(input.to_string());
+        let l = Lexer::new(input);
         let mut p = Parser::new(l);
         let program = p.parse_program().expect("parse_program() return none");
 
