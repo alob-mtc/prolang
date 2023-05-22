@@ -1,27 +1,52 @@
+use std::collections::HashMap;
 use std::fmt::format;
 
 use crate::lexer::lexer::Lexer;
 use crate::lexer::token::{Token, TokenType};
 
-use super::ast::{Identifier, LetStatement, Program, Statement};
+use super::ast::{Expression, ExpressionStatement, Identifier, LetStatement, Program, Statement};
+
+const LOWEST: i32 = 1;
+const EQUALS: i32 = 2; // ==
+const LESSGREATER: i32 = 3; // > or <
+const SUM: i32 = 4; // +
+const PRODUCT: i32 = 5; // *
+const PREFIX: i32 = 6; // -X or !X
+const CALL: i32 = 7; // fn(x)
+
+type PrefixParsefn = fn() -> dyn Expression;
+type InfixParsefn = fn(dyn Expression) -> dyn Expression;
 
 struct Parser {
     l: Lexer,
     errors: Vec<String>,
     cur_token: Token,
     peek_token: Token,
+
+    prefix_parsefns: HashMap<TokenType, PrefixParsefn>,
+    infix_parsefns: HashMap<TokenType, InfixParsefn>,
 }
 
 impl Parser {
-    pub fn new(l: Lexer) -> Parser {
-        let p = Parser {
+    pub fn new(l: Lexer) -> Self {
+        let p = Self {
             l,
             errors: vec![],
             cur_token: Token::default(),
             peek_token: Token::default(),
+            prefix_parsefns: HashMap::new(),
+            infix_parsefns: HashMap::new(),
         };
 
         return p;
+    }
+
+    fn register_prefix(&mut self, token_type: TokenType, func: PrefixParsefn) {
+        self.prefix_parsefns.insert(token_type, func);
+    }
+
+    fn register_infix(&mut self, token_type: TokenType, func: InfixParsefn) {
+        self.infix_parsefns.insert(token_type, func);
     }
 
     fn next_token(&mut self) {
@@ -93,6 +118,32 @@ impl Parser {
         }
 
         Some(Box::new(stmt))
+    }
+
+    fn parse_statment(&mut self) -> Option<Box<dyn Statement>> {
+        let stmt = ExpressionStatement {
+            token: self.cur_token.clone(),
+            expression: self.parse_expression(LOWEST),
+        };
+
+        if self.peek_token_is(&TokenType::SEMICOLON) {
+            self.next_token()
+        }
+
+        Some(Box::new(stmt))
+    }
+
+    fn parse_expression(&self, precedence: i32) -> Option<Box<dyn Expression>> {
+        let prefix = self.prefix_parsefns.get(&self.cur_token.token_type);
+        if prefix.is_none() {
+            return None;
+        }
+
+        // let left_exp = prefix.unwrap()();
+
+        // Some(Box::new(left_exp))
+
+        todo!()
     }
 
     fn cur_token_is(&self, t: TokenType) -> bool {
@@ -202,6 +253,52 @@ mod test {
                 stmt.token_literal()
             )
         }
+    }
+
+    #[test]
+    fn test_identifier_expression() {
+        let input = "foobar;";
+
+        let l = Lexer::new(input.to_string());
+        let mut p = Parser::new(l);
+        let program = p.parse_program().expect("parse_program() return none");
+
+        assert_eq!(chack_parser_errors(&p), false);
+        assert_eq!(
+            program.statements.len(),
+            1,
+            "program.statements does not contain 3 statements. got={}",
+            program.statements.len()
+        );
+
+        let stmt = program
+            .statements
+            .get(0)
+            .expect("expected statemnt[0] to have a value")
+            .get_expression_stmt()
+            .expect("program.Statements[0] is not ast.ExpressionStatement");
+
+        let ident = match &stmt.expression {
+            Some(ident) => match ident.get_ident() {
+                Some(ident) => ident,
+                _ => panic!("exp is not Identifier"),
+            },
+            _ => panic!("exp is none"),
+        };
+
+        assert_eq!(
+            ident.value, "foobar",
+            "ident.value not {}. got={}",
+            "foobar", ident.value
+        );
+
+        assert_eq!(
+            ident.token_literal(),
+            "foobar",
+            "ident.token_literal not {}. got={}",
+            "foobar",
+            ident.token_literal()
+        )
     }
 
     fn let_statemnt(s: &Box<dyn Statement>, name: String) {

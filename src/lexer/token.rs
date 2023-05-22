@@ -1,4 +1,4 @@
-#[derive(Debug, Default, PartialEq, Eq, Clone)]
+#[derive(Debug, Default, PartialEq, Eq, Clone, Hash)]
 pub enum TokenType {
     #[default]
     ILLEGAL,
@@ -57,8 +57,8 @@ pub fn lookup_ident(ident: &str) -> TokenType {
 }
 
 impl Token {
-    pub fn new(token_type: TokenType, ch: String) -> Token {
-        Token {
+    pub fn new(token_type: TokenType, ch: String) -> Self {
+        Self {
             token_type,
             literal: ch,
         }

@@ -8,8 +8,8 @@ pub struct Lexer {
 }
 
 impl Lexer {
-    pub fn new(input: String) -> Lexer {
-        let mut l = Lexer {
+    pub fn new(input: String) -> Self {
+        let mut l = Self {
             input,
             position: 0,
             read_position: 0,

@@ -323,7 +323,7 @@ fn test_next_token() {
         },
     ];
 
-    let mut l = Lexer::new(input.to_owned());
+    let mut l = Lexer::new(input.to_string());
     for tt in tests {
         let tok = l.next_token();
         assert_eq!(

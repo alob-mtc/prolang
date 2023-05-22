@@ -9,9 +9,16 @@ pub trait Statement: Node {
     fn get_let(&self) -> Option<&LetStatement> {
         None
     }
+    fn get_expression_stmt(&self) -> Option<&ExpressionStatement> {
+        None
+    }
 }
 
-pub trait Expression: Node {}
+pub trait Expression: Node {
+    fn get_ident(&self) -> Option<&Identifier> {
+        None
+    }
+}
 
 pub struct Program {
     pub statements: Vec<Box<dyn Statement>>,
@@ -79,11 +86,15 @@ impl Node for Identifier {
     }
 }
 
-impl Expression for Identifier {}
+impl Expression for Identifier {
+    fn get_ident(&self) -> Option<&Identifier> {
+        Some(self)
+    }
+}
 
 pub struct ExpressionStatement {
-    token: Token, //first token of the expression
-    expression: Option<Box<dyn Expression>>,
+    pub token: Token, //first token of the expression
+    pub expression: Option<Box<dyn Expression>>,
 }
 
 impl Node for ExpressionStatement {
@@ -99,7 +110,11 @@ impl Node for ExpressionStatement {
     }
 }
 
-impl Statement for ExpressionStatement {}
+impl Statement for ExpressionStatement {
+    fn get_expression_stmt(&self) -> Option<&ExpressionStatement> {
+        Some(self)
+    }
+}
 
 pub struct ReturnStatemnt {
     token: Token,
