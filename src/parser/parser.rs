@@ -1,8 +1,6 @@
-use std::collections::HashMap;
-use std::fmt::format;
-
 use crate::lexer::lexer::Lexer;
 use crate::lexer::token::{Token, TokenType};
+use std::collections::HashMap;
 
 use super::ast::{
     Expression, ExpressionStatement, Identifier, IntegerLiteral, LetStatement, Program, Statement,
@@ -48,7 +46,7 @@ impl Parser {
         p.prefix_parsefns
             .insert(TokenType::INT, parse_integer_literal);
 
-        return p;
+        p
     }
 
     fn register_prefix(&mut self, token_type: TokenType, func: PrefixParsefn) {
@@ -144,15 +142,15 @@ impl Parser {
         Some(Box::new(stmt))
     }
 
-    fn parse_expression(&self, precedence: i32) -> Option<Box<dyn Expression>> {
+    fn parse_expression(&self, _precedence: i32) -> Option<Box<dyn Expression>> {
         let prefix = self.prefix_parsefns.get(&self.cur_token.token_type);
-        if prefix.is_none() {
-            return None;
+
+        if let Some(prefix) = prefix {
+            let left_exp = prefix(self);
+            return Some(left_exp);
         }
 
-        let left_exp = prefix.unwrap()(self);
-
-        Some(left_exp)
+        None
     }
 
     fn cur_token_is(&self, t: TokenType) -> bool {
@@ -167,17 +165,17 @@ impl Parser {
             return true;
         }
         self.peek_error(t);
-        return false;
+        false
     }
 
     pub fn errors(&self) -> &Vec<String> {
         &self.errors
     }
     fn peek_error(&mut self, t: TokenType) {
-        let msg = format(format_args!(
+        let msg = format!(
             "expected next token to be {:?}, got {:?} instead",
             t, self.peek_token.token_type,
-        ));
+        );
         self.errors.push(msg)
     }
 }
@@ -404,6 +402,6 @@ mod test {
             println!("parser error: {}", err)
         }
 
-        return true;
+        true
     }
 }
