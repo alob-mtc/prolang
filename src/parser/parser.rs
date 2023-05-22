@@ -4,7 +4,9 @@ use std::fmt::format;
 use crate::lexer::lexer::Lexer;
 use crate::lexer::token::{Token, TokenType};
 
-use super::ast::{Expression, ExpressionStatement, Identifier, LetStatement, Program, Statement};
+use super::ast::{
+    Expression, ExpressionStatement, Identifier, IntegerLiteral, LetStatement, Program, Statement,
+};
 
 const LOWEST: i32 = 1;
 const EQUALS: i32 = 2; // ==
@@ -14,8 +16,8 @@ const PRODUCT: i32 = 5; // *
 const PREFIX: i32 = 6; // -X or !X
 const CALL: i32 = 7; // fn(x)
 
-type PrefixParsefn = fn() -> dyn Expression;
-type InfixParsefn = fn(dyn Expression) -> dyn Expression;
+type PrefixParsefn = fn(&Parser) -> Box<dyn Expression>;
+type InfixParsefn = fn(&Parser, dyn Expression) -> Box<dyn Expression>;
 
 struct Parser {
     l: Lexer,
@@ -29,7 +31,7 @@ struct Parser {
 
 impl Parser {
     pub fn new(l: Lexer) -> Self {
-        let p = Self {
+        let mut p = Self {
             l,
             errors: vec![],
             cur_token: Token::default(),
@@ -37,6 +39,14 @@ impl Parser {
             prefix_parsefns: HashMap::new(),
             infix_parsefns: HashMap::new(),
         };
+
+        // clear default tokens
+        p.next_token();
+        p.next_token();
+
+        p.prefix_parsefns.insert(TokenType::IDENT, parse_identifier);
+        p.prefix_parsefns
+            .insert(TokenType::INT, parse_integer_literal);
 
         return p;
     }
@@ -70,7 +80,8 @@ impl Parser {
         match self.cur_token.token_type {
             TokenType::LET => self.parse_let_statement(),
             TokenType::RETURN => self.parse_return_statement(),
-            _ => None,
+            TokenType::None => None,
+            _ => self.parse_expression_statment(),
         }
     }
 
@@ -120,7 +131,7 @@ impl Parser {
         Some(Box::new(stmt))
     }
 
-    fn parse_statment(&mut self) -> Option<Box<dyn Statement>> {
+    fn parse_expression_statment(&mut self) -> Option<Box<dyn Statement>> {
         let stmt = ExpressionStatement {
             token: self.cur_token.clone(),
             expression: self.parse_expression(LOWEST),
@@ -139,11 +150,9 @@ impl Parser {
             return None;
         }
 
-        // let left_exp = prefix.unwrap()();
+        let left_exp = prefix.unwrap()(self);
 
-        // Some(Box::new(left_exp))
-
-        todo!()
+        Some(left_exp)
     }
 
     fn cur_token_is(&self, t: TokenType) -> bool {
@@ -171,6 +180,20 @@ impl Parser {
         ));
         self.errors.push(msg)
     }
+}
+
+fn parse_identifier(p: &Parser) -> Box<dyn Expression> {
+    Box::new(Identifier {
+        token: p.cur_token.clone(),
+        value: p.cur_token.literal.clone(),
+    })
+}
+
+fn parse_integer_literal(p: &Parser) -> Box<dyn Expression> {
+    Box::new(IntegerLiteral {
+        token: p.cur_token.clone(),
+        value: p.cur_token.literal.parse().unwrap(),
+    })
 }
 
 #[cfg(test)]
@@ -295,6 +318,52 @@ mod test {
         assert_eq!(
             ident.token_literal(),
             "foobar",
+            "ident.token_literal not {}. got={}",
+            "foobar",
+            ident.token_literal()
+        )
+    }
+
+    #[test]
+    fn test_integer_literal_expression() {
+        let input = "5;";
+
+        let l = Lexer::new(input.to_string());
+        let mut p = Parser::new(l);
+        let program = p.parse_program().expect("parse_program() return none");
+
+        assert_eq!(chack_parser_errors(&p), false);
+        assert_eq!(
+            program.statements.len(),
+            1,
+            "program.statements does not contain 3 statements. got={}",
+            program.statements.len()
+        );
+
+        let stmt = program
+            .statements
+            .get(0)
+            .expect("expected statemnt[0] to have a value")
+            .get_expression_stmt()
+            .expect("program.Statements[0] is not ast.ExpressionStatement");
+
+        let ident = match &stmt.expression {
+            Some(ident) => match ident.get_int_literal() {
+                Some(ident) => ident,
+                _ => panic!("exp is not Identifier"),
+            },
+            _ => panic!("exp is none"),
+        };
+
+        assert_eq!(
+            ident.value, 5,
+            "ident.value not {}. got={}",
+            "foobar", ident.value
+        );
+
+        assert_eq!(
+            ident.token_literal(),
+            "5",
             "ident.token_literal not {}. got={}",
             "foobar",
             ident.token_literal()

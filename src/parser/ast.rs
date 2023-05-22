@@ -18,6 +18,9 @@ pub trait Expression: Node {
     fn get_ident(&self) -> Option<&Identifier> {
         None
     }
+    fn get_int_literal(&self) -> Option<&IntegerLiteral> {
+        None
+    }
 }
 
 pub struct Program {
@@ -136,6 +139,27 @@ impl Node for ReturnStatemnt {
         out.push_str(";");
 
         out
+    }
+}
+
+pub struct IntegerLiteral {
+    pub token: Token,
+    pub value: i64,
+}
+
+impl Node for IntegerLiteral {
+    fn token_literal(&self) -> String {
+        self.token.literal.to_owned()
+    }
+
+    fn string(&self) -> String {
+        self.token.literal.to_owned()
+    }
+}
+
+impl Expression for IntegerLiteral {
+    fn get_int_literal(&self) -> Option<&IntegerLiteral> {
+        Some(self)
     }
 }
 

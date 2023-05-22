@@ -1,6 +1,8 @@
 #[derive(Debug, Default, PartialEq, Eq, Clone, Hash)]
 pub enum TokenType {
     #[default]
+    None,
+
     ILLEGAL,
     EOF,
     // Identifiers + literals

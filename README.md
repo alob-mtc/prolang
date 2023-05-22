@@ -148,6 +148,13 @@ myHash["age"]  // 72
 
 ### TODO:
 
+##### Frontend
+
 - [ ] Type system
+
+##### Backend
+
 - [ ] GC
 - [ ] Error handling
+- [ ] Async and concurrency
+- [ ] std lib
