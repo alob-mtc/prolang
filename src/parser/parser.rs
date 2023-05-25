@@ -142,13 +142,14 @@ impl Parser {
         Some(Box::new(stmt))
     }
 
-    fn parse_expression(&self, _precedence: i32) -> Option<Box<dyn Expression>> {
+    fn parse_expression(&mut self, _precedence: i32) -> Option<Box<dyn Expression>> {
         let prefix = self.prefix_parsefns.get(&self.cur_token.token_type);
 
         if let Some(prefix) = prefix {
             let left_exp = prefix(self);
             return Some(left_exp);
         }
+        self.no_prefix_parse_fn_error();
 
         None
     }
@@ -178,6 +179,13 @@ impl Parser {
         );
         self.errors.push(msg)
     }
+    fn no_prefix_parse_fn_error(&mut self) {
+        let msg = format!(
+            "no prefix parse function for {} found",
+            self.cur_token.literal
+        );
+        self.errors.push(msg);
+    }
 }
 
 fn parse_identifier(p: &Parser) -> Box<dyn Expression> {
@@ -199,7 +207,7 @@ mod test {
     use super::Parser;
     use crate::{
         lexer::lexer::Lexer,
-        parser::ast::{Node, Statement},
+        parser::ast::{Expression, Node, Statement},
     };
 
     #[test]
@@ -367,6 +375,82 @@ mod test {
             "ident.token_literal not {}. got={}",
             "foobar",
             ident.token_literal()
+        )
+    }
+
+    #[test]
+    fn test_parsing_prefix_expression() {
+        struct TestCase {
+            input: String,
+            operator: String,
+            integer_value: i64,
+        }
+
+        let tests = vec![
+            TestCase {
+                input: "!5".to_string(),
+                operator: "!".to_string(),
+                integer_value: 5,
+            },
+            TestCase {
+                input: "-15".to_string(),
+                operator: "1".to_string(),
+                integer_value: 15,
+            },
+        ];
+
+        for tt in tests {
+            let l = Lexer::new(tt.input);
+            let mut p = Parser::new(l);
+            let program = p.parse_program().expect("parse_program() return none");
+
+            assert_eq!(chack_parser_errors(&p), false);
+            assert_eq!(
+                program.statements.len(),
+                1,
+                "program.statements does not contain 3 statements. got={}",
+                program.statements.len()
+            );
+
+            let stmt = program
+                .statements
+                .get(0)
+                .expect("expected statemnt[0] to have a value")
+                .get_expression_stmt()
+                .expect("program.Statements[0] is not ast.ExpressionStatement");
+
+            let exp = match &stmt.expression {
+                Some(exp) => match exp.get_prefix_exp() {
+                    Some(exp) => exp,
+                    _ => panic!("exp is not Identifier"),
+                },
+                _ => panic!("exp is none"),
+            };
+
+            assert_eq!(
+                exp.operator, tt.operator,
+                "ident.value not {}. got={}",
+                tt.operator, exp.operator
+            );
+
+            test_int_literal(&exp.right, tt.integer_value)
+        }
+    }
+
+    fn test_int_literal(il: &Box<dyn Expression>, value: i64) {
+        let integ = il.get_int_literal().expect("il is not IntergerLiteral");
+        assert_eq!(
+            integ.value, value,
+            "integ.value not {}. got={}",
+            value, integ.value
+        );
+
+        assert_eq!(
+            integ.token_literal(),
+            value.to_string(),
+            "integ.token_literal not {}. got={}",
+            value,
+            integ.token_literal()
         )
     }
 

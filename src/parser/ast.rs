@@ -21,6 +21,9 @@ pub trait Expression: Node {
     fn get_int_literal(&self) -> Option<&IntegerLiteral> {
         None
     }
+    fn get_prefix_exp(&self) -> Option<&PrefixExpression> {
+        None
+    }
 }
 
 pub struct Program {
@@ -160,6 +163,34 @@ impl Node for IntegerLiteral {
 impl Expression for IntegerLiteral {
     fn get_int_literal(&self) -> Option<&IntegerLiteral> {
         Some(self)
+    }
+}
+
+pub struct PrefixExpression {
+    pub token: Token, //prefix token
+    pub operator: String,
+    pub right: Box<dyn Expression>,
+}
+
+impl Expression for PrefixExpression {
+    fn get_prefix_exp(&self) -> Option<&PrefixExpression> {
+        Some(self)
+    }
+}
+
+impl Node for PrefixExpression {
+    fn token_literal(&self) -> String {
+        self.token.literal.to_owned()
+    }
+
+    fn string(&self) -> String {
+        let mut out = String::new();
+        out.push_str("(");
+        out.push_str(&self.operator);
+        out.push_str(&self.right.string());
+        out.push_str(")");
+
+        out
     }
 }
 
