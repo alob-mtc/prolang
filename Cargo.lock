@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "protolang_rust"
+name = "protolang"
 version = "0.1.0"

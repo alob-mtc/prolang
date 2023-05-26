@@ -1,5 +1,5 @@
 [package]
-name = "protolang_rust"
+name = "protolang"
 version = "0.1.0"
 edition = "2021"
 

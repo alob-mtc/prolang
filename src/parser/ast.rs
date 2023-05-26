@@ -32,10 +32,10 @@ pub struct Program {
 
 impl Node for Program {
     fn token_literal(&self) -> String {
-        if self.statements.len() > 0 {
+        if !self.statements.is_empty() {
             return self.statements.get(0).unwrap().token_literal();
         }
-        return "".to_string();
+        "".to_string()
     }
     fn string(&self) -> String {
         let mut out = String::new();
@@ -59,13 +59,13 @@ impl Node for LetStatement {
     fn string(&self) -> String {
         let mut out = String::new();
         out.push_str(&self.token_literal());
-        out.push_str(" ");
+        out.push(' ');
         out.push_str(&self.name.string());
         out.push_str(" = ");
         if let Some(value) = &self.value {
             out.push_str(&value.string());
         }
-        out.push_str(";");
+        out.push(';');
 
         out
     }
@@ -139,7 +139,7 @@ impl Node for ReturnStatemnt {
         if let Some(return_value) = &self.return_value {
             out.push_str(&return_value.string());
         }
-        out.push_str(";");
+        out.push(';');
 
         out
     }
@@ -169,7 +169,7 @@ impl Expression for IntegerLiteral {
 pub struct PrefixExpression {
     pub token: Token, //prefix token
     pub operator: String,
-    pub right: Box<dyn Expression>,
+    pub right: Option<Box<dyn Expression>>,
 }
 
 impl Expression for PrefixExpression {
@@ -185,10 +185,10 @@ impl Node for PrefixExpression {
 
     fn string(&self) -> String {
         let mut out = String::new();
-        out.push_str("(");
+        out.push('(');
         out.push_str(&self.operator);
-        out.push_str(&self.right.string());
-        out.push_str(")");
+        out.push_str(&self.right.as_ref().unwrap().string());
+        out.push(')');
 
         out
     }

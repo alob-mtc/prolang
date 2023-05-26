@@ -3,7 +3,8 @@ use crate::lexer::token::{Token, TokenType};
 use std::collections::HashMap;
 
 use super::ast::{
-    Expression, ExpressionStatement, Identifier, IntegerLiteral, LetStatement, Program, Statement,
+    Expression, ExpressionStatement, Identifier, IntegerLiteral, LetStatement, PrefixExpression,
+    Program, Statement,
 };
 
 const LOWEST: i32 = 1;
@@ -14,17 +15,11 @@ const PRODUCT: i32 = 5; // *
 const PREFIX: i32 = 6; // -X or !X
 const CALL: i32 = 7; // fn(x)
 
-type PrefixParsefn = fn(&Parser) -> Box<dyn Expression>;
-type InfixParsefn = fn(&Parser, dyn Expression) -> Box<dyn Expression>;
-
 pub struct Parser {
     l: Lexer,
     errors: Vec<String>,
     cur_token: Token,
     peek_token: Token,
-
-    prefix_parsefns: HashMap<TokenType, PrefixParsefn>,
-    infix_parsefns: HashMap<TokenType, InfixParsefn>,
 }
 
 impl Parser {
@@ -34,27 +29,13 @@ impl Parser {
             errors: vec![],
             cur_token: Token::default(),
             peek_token: Token::default(),
-            prefix_parsefns: HashMap::new(),
-            infix_parsefns: HashMap::new(),
         };
 
         // clear default tokens
         p.next_token();
         p.next_token();
 
-        p.prefix_parsefns.insert(TokenType::IDENT, parse_identifier);
-        p.prefix_parsefns
-            .insert(TokenType::INT, parse_integer_literal);
-
         p
-    }
-
-    fn register_prefix(&mut self, token_type: TokenType, func: PrefixParsefn) {
-        self.prefix_parsefns.insert(token_type, func);
-    }
-
-    fn register_infix(&mut self, token_type: TokenType, func: InfixParsefn) {
-        self.infix_parsefns.insert(token_type, func);
     }
 
     fn next_token(&mut self) {
@@ -143,10 +124,9 @@ impl Parser {
     }
 
     fn parse_expression(&mut self, _precedence: i32) -> Option<Box<dyn Expression>> {
-        let prefix = self.prefix_parsefns.get(&self.cur_token.token_type);
+        let left_exp = parse_func(self);
 
-        if let Some(prefix) = prefix {
-            let left_exp = prefix(self);
+        if let Some(left_exp) = left_exp {
             return Some(left_exp);
         }
         self.no_prefix_parse_fn_error();
@@ -192,6 +172,31 @@ impl Parser {
 }
 
 // parse functions
+fn parse_func(p: &mut Parser) -> Option<Box<dyn Expression>> {
+    match p.cur_token.token_type {
+        TokenType::IDENT => Some(parse_identifier(p)),
+        TokenType::INT => Some(parse_integer_literal(p)),
+        TokenType::BANG => parse_prefix_expression(p),
+        TokenType::MINUS => parse_prefix_expression(p),
+        _ => None,
+    }
+}
+
+fn parse_prefix_expression(p: &mut Parser) -> Option<Box<dyn Expression>> {
+    let mut expression = Box::new(PrefixExpression {
+        token: p.cur_token.clone(),
+        operator: p.cur_token.literal.clone(),
+        right: None,
+    });
+    p.next_token();
+    if let Some(right_exp) = p.parse_expression(PREFIX) {
+        expression.right = Some(right_exp);
+        return Some(expression);
+    }
+
+    None
+}
+
 fn parse_identifier(p: &Parser) -> Box<dyn Expression> {
     Box::new(Identifier {
         token: p.cur_token.clone(),

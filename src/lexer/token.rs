@@ -47,14 +47,14 @@ pub struct Token {
 
 pub fn lookup_ident(ident: &str) -> TokenType {
     match ident {
-        "fn" => return TokenType::FUNCTION,
-        "let" => return TokenType::LET,
-        "true" => return TokenType::TRUE,
-        "false" => return TokenType::FALSE,
-        "if" => return TokenType::IF,
-        "else" => return TokenType::ELSE,
-        "return" => return TokenType::RETURN,
-        _ => return TokenType::IDENT,
+        "fn" => TokenType::FUNCTION,
+        "let" => TokenType::LET,
+        "true" => TokenType::TRUE,
+        "false" => TokenType::FALSE,
+        "if" => TokenType::IF,
+        "else" => TokenType::ELSE,
+        "return" => TokenType::RETURN,
+        _ => TokenType::IDENT,
     }
 }
 

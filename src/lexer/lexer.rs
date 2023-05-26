@@ -18,7 +18,7 @@ impl Lexer {
 
         l.read_char();
 
-        return l;
+        l
     }
 
     fn read_char(&mut self) {
@@ -96,7 +96,7 @@ impl Lexer {
         }
 
         self.read_char();
-        return tok;
+        tok
     }
 
     fn skip_whitespace(&mut self) {
@@ -111,7 +111,7 @@ impl Lexer {
             self.read_char();
         }
 
-        (&self.input[position..self.position]).to_string()
+        self.input[position..self.position].to_string()
     }
 
     fn read_number(&mut self) -> String {
@@ -120,14 +120,14 @@ impl Lexer {
             self.read_char();
         }
 
-        (&self.input[position..self.position]).to_string()
+        self.input[position..self.position].to_string()
     }
 }
 
 fn is_letter(ch: char) -> bool {
-    'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
+    ('a'..='z').contains(&ch) || ('A'..='Z').contains(&ch) || ch == '_'
 }
 
 fn is_digit(ch: char) -> bool {
-    '0' <= ch && ch <= '9'
+    ('0'..='9').contains(&ch)
 }

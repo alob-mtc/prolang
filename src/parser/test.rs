@@ -190,7 +190,7 @@ mod test {
             },
             TestCase {
                 input: "-15".to_string(),
-                operator: "1".to_string(),
+                operator: "-".to_string(),
                 integer_value: 15,
             },
         ];
@@ -229,7 +229,7 @@ mod test {
                 tt.operator, exp.operator
             );
 
-            test_int_literal(&exp.right, tt.integer_value)
+            test_int_literal(exp.right.as_ref().unwrap(), tt.integer_value)
         }
     }
 
