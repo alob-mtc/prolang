@@ -65,4 +65,7 @@ impl Token {
             literal: ch,
         }
     }
+    pub fn take(&mut self) -> Self {
+        std::mem::take(self)
+    }
 }

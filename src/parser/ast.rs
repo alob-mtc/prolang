@@ -24,6 +24,9 @@ pub trait Expression: Node {
     fn get_prefix_exp(&self) -> Option<&PrefixExpression> {
         None
     }
+    fn get_infix_exp(&self) -> Option<&InfixExpression> {
+        None
+    }
 }
 
 pub struct Program {
@@ -187,6 +190,38 @@ impl Node for PrefixExpression {
         let mut out = String::new();
         out.push('(');
         out.push_str(&self.operator);
+        out.push_str(&self.right.as_ref().unwrap().string());
+        out.push(')');
+
+        out
+    }
+}
+
+pub struct InfixExpression {
+    pub token: Token, //infix token: '-', '+'
+    pub left: Option<Box<dyn Expression>>,
+    pub operator: String,
+    pub right: Option<Box<dyn Expression>>,
+}
+
+impl Expression for InfixExpression {
+    fn get_infix_exp(&self) -> Option<&InfixExpression> {
+        Some(self)
+    }
+}
+
+impl Node for InfixExpression {
+    fn token_literal(&self) -> String {
+        self.token.literal.to_owned()
+    }
+
+    fn string(&self) -> String {
+        let mut out = String::new();
+        out.push('(');
+        out.push_str(&self.left.as_ref().unwrap().string());
+        out.push(' ');
+        out.push_str(&self.operator);
+        out.push(' ');
         out.push_str(&self.right.as_ref().unwrap().string());
         out.push(')');
 

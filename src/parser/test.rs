@@ -8,12 +8,13 @@ mod test {
 
     #[test]
     fn test_let_statement() {
-        let input = "
+        let input = String::from(
+            "
         let x = 5;
         let y = 10;
         let foobar = 838383;
-        "
-        .to_string();
+        ",
+        );
 
         let l = Lexer::new(input);
         let mut p = Parser::new(l);
@@ -33,13 +34,13 @@ mod test {
 
         let tests = vec![
             TestCase {
-                expected_identifier: "x".to_string(),
+                expected_identifier: String::from("x"),
             },
             TestCase {
-                expected_identifier: "y".to_string(),
+                expected_identifier: String::from("y"),
             },
             TestCase {
-                expected_identifier: "foobar".to_string(),
+                expected_identifier: String::from("foobar"),
             },
         ];
 
@@ -53,12 +54,13 @@ mod test {
 
     #[test]
     fn test_return_statement() {
-        let input = "
+        let input = String::from(
+            "
         return 5;
         return 10;
         return 993322;
-        "
-        .to_string();
+        ",
+        );
 
         let l = Lexer::new(input);
         let mut p = Parser::new(l);
@@ -84,7 +86,7 @@ mod test {
 
     #[test]
     fn test_identifier_expression() {
-        let input = "foobar;".to_string();
+        let input = String::from("foobar;");
 
         let l = Lexer::new(input);
         let mut p = Parser::new(l);
@@ -130,7 +132,7 @@ mod test {
 
     #[test]
     fn test_integer_literal_expression() {
-        let input = "5;".to_string();
+        let input = String::from("5;");
 
         let l = Lexer::new(input);
         let mut p = Parser::new(l);
@@ -140,7 +142,7 @@ mod test {
         assert_eq!(
             program.statements.len(),
             1,
-            "program.statements does not contain 3 statements. got={}",
+            "program.statements does not contain 1 statements. got={}",
             program.statements.len()
         );
 
@@ -184,13 +186,13 @@ mod test {
 
         let tests = vec![
             TestCase {
-                input: "!5".to_string(),
-                operator: "!".to_string(),
+                input: String::from("!5"),
+                operator: String::from("!"),
                 integer_value: 5,
             },
             TestCase {
-                input: "-15".to_string(),
-                operator: "-".to_string(),
+                input: String::from("-15"),
+                operator: String::from("-"),
                 integer_value: 15,
             },
         ];
@@ -204,7 +206,7 @@ mod test {
             assert_eq!(
                 program.statements.len(),
                 1,
-                "program.statements does not contain 3 statements. got={}",
+                "program.statements does not contain 1 statements. got={}",
                 program.statements.len()
             );
 
@@ -230,6 +232,106 @@ mod test {
             );
 
             test_int_literal(exp.right.as_ref().unwrap(), tt.integer_value)
+        }
+    }
+
+    #[test]
+    fn test_parsing_infix_expression() {
+        struct TestCase {
+            input: String,
+            left_value: i64,
+            operator: String,
+            right_value: i64,
+        }
+
+        let tests = vec![
+            TestCase {
+                input: String::from("5 + 5;"),
+                left_value: 5,
+                operator: String::from("+"),
+                right_value: 5,
+            },
+            TestCase {
+                input: String::from("5 - 5;"),
+                left_value: 5,
+                operator: String::from("-"),
+                right_value: 5,
+            },
+            TestCase {
+                input: String::from("5 * 5;"),
+                left_value: 5,
+                operator: String::from("*"),
+                right_value: 5,
+            },
+            TestCase {
+                input: String::from("5 / 5;"),
+                left_value: 5,
+                operator: String::from("/"),
+                right_value: 5,
+            },
+            TestCase {
+                input: String::from("5 > 5;"),
+                left_value: 5,
+                operator: String::from(">"),
+                right_value: 5,
+            },
+            TestCase {
+                input: String::from("5 < 5;"),
+                left_value: 5,
+                operator: String::from("<"),
+                right_value: 5,
+            },
+            TestCase {
+                input: String::from("5 == 5;"),
+                left_value: 5,
+                operator: String::from("=="),
+                right_value: 5,
+            },
+            TestCase {
+                input: String::from("5 != 5;"),
+                left_value: 5,
+                operator: String::from("!="),
+                right_value: 5,
+            },
+        ];
+
+        for tt in tests {
+            let l = Lexer::new(tt.input);
+            let mut p = Parser::new(l);
+            let program = p.parse_program().expect("parse_program() return none");
+
+            assert_eq!(chack_parser_errors(&p), false);
+            assert_eq!(
+                program.statements.len(),
+                1,
+                "program.statements does not contain 1 statements. got={}",
+                program.statements.len()
+            );
+
+            let stmt = program
+                .statements
+                .get(0)
+                .expect("expected statemnt[0] to have a value")
+                .get_expression_stmt()
+                .expect("program.Statements[0] is not ast.ExpressionStatement");
+
+            let exp = match &stmt.expression {
+                Some(exp) => match exp.get_infix_exp() {
+                    Some(exp) => exp,
+                    _ => panic!("exp is not Identifier"),
+                },
+                _ => panic!("exp is none"),
+            };
+
+            test_int_literal(exp.right.as_ref().unwrap(), tt.left_value);
+
+            assert_eq!(
+                exp.operator, tt.operator,
+                "ident.value not {}. got={}",
+                tt.operator, exp.operator
+            );
+
+            test_int_literal(exp.right.as_ref().unwrap(), tt.right_value)
         }
     }
 
