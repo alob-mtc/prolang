@@ -4,7 +4,7 @@ use crate::lexer::lexer::Lexer;
 use crate::lexer::token::{Token, TokenType};
 
 use super::ast::{Expression, ExpressionStatement, Identifier, LetStatement, Program, Statement};
-use super::parse_func::parse_prefix_func;
+use super::parse_func::{parse_infix_func, parse_prefix_func};
 
 const LOWEST: i32 = 1;
 const EQUALS: i32 = 2; // ==
@@ -120,18 +120,21 @@ impl Parser {
     }
 
     pub(crate) fn parse_expression(&mut self, precedence: i32) -> Option<Box<dyn Expression>> {
-        let mut left_exp = parse_prefix_func(self);
-        if let Some(left_exp_) = &left_exp {
-            while !self.peek_token_is(&TokenType::SEMICOLON) && precedence < self.peek_precedence()
-            {
-                // TODO: think about this implementation
-                // self.next_token();
-                // left_exp = parse_infix_func(self, left_exp_);
+        match parse_prefix_func(self) {
+            Some(mut left_exp) => {
+                while !self.peek_token_is(&TokenType::SEMICOLON)
+                    && precedence < self.peek_precedence()
+                {
+                    // TODO: think about this implementation
+                    self.next_token();
+                    left_exp = parse_infix_func(self, left_exp).unwrap();
+                }
+                Some(left_exp)
             }
-            return left_exp;
-        } else {
-            self.no_prefix_parse_fn_error();
-            return None;
+            _ => {
+                self.no_prefix_parse_fn_error();
+                return None;
+            }
         }
     }
 }

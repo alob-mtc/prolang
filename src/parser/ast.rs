@@ -199,7 +199,7 @@ impl Node for PrefixExpression {
 
 pub struct InfixExpression {
     pub token: Token, //infix token: '-', '+'
-    pub left: Option<Box<dyn Expression>>,
+    pub left: Box<dyn Expression>,
     pub operator: String,
     pub right: Option<Box<dyn Expression>>,
 }
@@ -218,7 +218,7 @@ impl Node for InfixExpression {
     fn string(&self) -> String {
         let mut out = String::new();
         out.push('(');
-        out.push_str(&self.left.as_ref().unwrap().string());
+        out.push_str(&self.left.string());
         out.push(' ');
         out.push_str(&self.operator);
         out.push(' ');

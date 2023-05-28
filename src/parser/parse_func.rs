@@ -26,7 +26,7 @@ pub(crate) fn parse_infix_func(
 fn parse_infix_expression(p: &mut Parser, left: Box<dyn Expression>) -> Box<dyn Expression> {
     let mut expression = Box::new(InfixExpression {
         token: p.cur_token.clone(),
-        left: Some(left),
+        left,
         operator: p.cur_token.literal.clone(),
         right: None,
     });
@@ -34,7 +34,7 @@ fn parse_infix_expression(p: &mut Parser, left: Box<dyn Expression>) -> Box<dyn 
     p.next_token();
     expression.right = p.parse_expression(precedence);
     expression
-}   
+}
 
 pub(crate) fn parse_prefix_func(p: &mut Parser) -> Option<Box<dyn Expression>> {
     match p.cur_token.token_type {

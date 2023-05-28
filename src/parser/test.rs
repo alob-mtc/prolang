@@ -323,7 +323,7 @@ mod test {
                 _ => panic!("exp is none"),
             };
 
-            test_int_literal(exp.right.as_ref().unwrap(), tt.left_value);
+            test_int_literal(&exp.left, tt.left_value);
 
             assert_eq!(
                 exp.operator, tt.operator,
