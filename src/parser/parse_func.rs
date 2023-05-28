@@ -5,7 +5,6 @@ use super::{
     parser::{Parser, PREFIX},
 };
 
-// parse functions
 pub(crate) fn parse_infix_func(
     p: &mut Parser,
     left: Box<dyn Expression>,
