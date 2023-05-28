@@ -22,21 +22,13 @@ impl Lexer {
     }
 
     fn read_char(&mut self) {
-        if self.read_position >= self.input.len() {
-            self.ch = '\0';
-        } else {
-            self.ch = self.input.chars().nth(self.read_position).unwrap();
-        }
-
+        self.ch = self.input.chars().nth(self.read_position).unwrap_or('\0');
         self.position = self.read_position;
         self.read_position += 1;
     }
 
     fn peek_char(&self) -> char {
-        if self.read_position >= self.input.len() {
-            return '\0';
-        }
-        self.input.chars().nth(self.read_position).unwrap()
+        self.input.chars().nth(self.read_position).unwrap_or('\0')
     }
 
     pub fn next_token(&mut self) -> Token {
@@ -100,7 +92,7 @@ impl Lexer {
     }
 
     fn skip_whitespace(&mut self) {
-        while self.ch == '\t' || self.ch == '\n' || self.ch == '\r' || self.ch == ' ' {
+        while ['\t', '\n', '\r', ' '].contains(&self.ch) {
             self.read_char()
         }
     }
