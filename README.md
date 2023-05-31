@@ -51,7 +51,7 @@ applyFunc(10, 2, sub); // 8
 
 let makeGreeter = fn(greeting) {
     return fn(name) {
-        return greeting + " " + name + "!" \
+        return greeting + " " + name + "!"
     }
 };
 
