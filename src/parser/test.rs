@@ -335,6 +335,83 @@ mod test {
         }
     }
 
+    #[test]
+    fn test_operator_precedence_parsing() {
+        struct TestCase {
+            input: String,
+            expected: String,
+        }
+
+        let tests = vec![
+            TestCase {
+                input: String::from("-a * b"),
+                expected: String::from("((-a) * b)"),
+            },
+            TestCase {
+                input: String::from("!-a"),
+                expected: String::from("(!(-a))"),
+            },
+            TestCase {
+                input: String::from("a + b + c"),
+                expected: String::from("((a + b) + c)"),
+            },
+            TestCase {
+                input: String::from("a + b - c"),
+                expected: String::from("((a + b) - c)"),
+            },
+            TestCase {
+                input: String::from("a * b * c"),
+                expected: String::from("((a * b) * c)"),
+            },
+            TestCase {
+                input: String::from("a * b / c"),
+                expected: String::from("((a * b) / c)"),
+            },
+            TestCase {
+                input: String::from("a + b / c"),
+                expected: String::from("(a + (b / c))"),
+            },
+            TestCase {
+                input: String::from("a + b * c + d / e - f"),
+                expected: String::from("(((a + (b * c)) + (d / e)) - f)"),
+            },
+            TestCase {
+                input: String::from("3 + 4; -5 * 5"),
+                expected: String::from("(3 + 4)((-5) * 5)"),
+            },
+            TestCase {
+                input: String::from("5 > 4 == 3 < 4"),
+                expected: String::from("((5 > 4) == (3 < 4))"),
+            },
+            TestCase {
+                input: String::from("5 < 4 != 3 > 4"),
+                expected: String::from("((5 < 4) != (3 > 4))"),
+            },
+            TestCase {
+                input: String::from("3 + 4 * 5 == 3 * 1 + 4 * 5"),
+                expected: String::from("((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"),
+            },
+            TestCase {
+                input: String::from("3 + 4 * 5 == 3 * 1 + 4 * 5"),
+                expected: String::from("((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"),
+            },
+        ];
+
+        for tt in tests {
+            let l = Lexer::new(tt.input);
+            let mut p = Parser::new(l);
+            let program = p.parse_program().expect("parse_program() return none");
+
+            assert_eq!(chack_parser_errors(&p), false);
+            let actual = program.string();
+            assert_eq!(
+                actual, tt.expected,
+                "expected={}, got={}",
+                tt.expected, actual
+            )
+        }
+    }
+
     fn test_int_literal(il: &Box<dyn Expression>, value: i64) {
         let integ = il.get_int_literal().expect("il is not IntergerLiteral");
         assert_eq!(

@@ -127,7 +127,7 @@ impl Parser {
                 {
                     // TODO: think about this implementation
                     self.next_token();
-                    left_exp = parse_infix_func(self, left_exp).unwrap();
+                    left_exp = parse_infix_func(self, left_exp)?;
                 }
                 Some(left_exp)
             }
@@ -160,7 +160,7 @@ impl Parser {
     }
 
     pub(crate) fn cur_precedence(&self) -> i32 {
-        if let Some(&p) = self.precedences.get(&self.peek_token.token_type) {
+        if let Some(&p) = self.precedences.get(&self.cur_token.token_type) {
             return p;
         }
         LOWEST

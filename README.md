@@ -18,19 +18,26 @@ And then there are the different data types:
 
 > syntax and language grammar would change and evolve
 
+##### Expressions
+
 ```rs
-// expressions
 let one = 1;
 let two = 2;
 let add = fn(x, y) {
     return x + y;
 };
 let result = add(one, two);
+```
 
-// if-expression
+##### If-expression
+
+```rs
 let d = if (c > a) { return 99 } else { return 100 };
+```
 
-// function-expression
+##### Function-expression & function-closure: higher-order
+
+```rs
 let addThree = fn(x) { return x + 3 };
 
 println("x+3 = ", addThree(3));
@@ -39,24 +46,27 @@ let add = fn(a,b) { a + b};
 let sub = fn(a,b) { a - b};
 let applyFunc = fn(a,b,func) { func(a,b) };
 
-applyFunc(2, 2, add);   // 4
-applyFunc(10, 2, sub);  // 8
+applyFunc(2, 2, add); // 4
+applyFunc(10, 2, sub); // 8
 
-// function-closure: higher-order
 let makeGreeter = fn(greeting) {
     return fn(name) {
         return greeting + " " + name + "!" \
     }
 };
-let hello  = makeGreeter("Hello");
-hello("John");   // Hello John!
 
-// array
+let hello = makeGreeter("Hello");
+hello("John"); // Hello John!
+```
+
+##### Array
+
+```rs
 let arr = [1, 2, 3, 4];
-len(arr);    // 4
-len("hello world");    //11
+len(arr); // 4
+len("hello world"); //11
 
-let a  = [1, 2, 3, 4];
+let a = [1, 2, 3, 4];
 let b = push(a, 5);
 
 println(a) // [1, 2, 3, 4]
@@ -66,48 +76,57 @@ a = rest(a);
 println(a) // [2, 3, 4]
 a = rest(a);
 println(rest(a)) // [3, 4]
+```
 
+##### Self calling function
 
-// self calling function
+```rs
 let even = fn() {
     let arr = [];
     for (i in 0..10) {
         if i % 2 == 0 {
-            arr = push(arr, i);
+        arr = push(arr, i);
         }
     }
-
     return arr;
 }()
 
 println("list of even number:", even)
 
-// recursion
+```
+
+##### Recursion
+
+```rs
 fn fib(n) {
     if n <= 1 {
         return n;
     };
-
     return fib(n-1) + fib(n-2);
 }
 
+```
 
-// built in functions: push and rest
+##### Built in functions: push and rest
+
+```rs
+// create map function with built in function
 let map = fn(arr, f) {
     let iter = fn(arr, accumulated) {
         if (len(arr) == 0) {
             accumulated
         } else {
-            iter(rest(arr), push(accumulated, f(arr[0])));
+        iter(rest(arr), push(accumulated, f(arr[0])));
         }
     };
     iter(arr, []);
 };
 
 let a = [1, 2, 3, 4];
-let double = fn(x) { x * 2 };
+let double = fn(x) { x \* 2 };
 map(a, double); //[2, 4, 6, 8]
 
+// create reduce function with built in function
 let reduce = fn(arr, initial, f) {
     let iter = fn(arr, result) {
         if (len(arr) == 0) {
@@ -116,33 +135,40 @@ let reduce = fn(arr, initial, f) {
             iter(rest(arr), f(result, arr[0]));
         }
     };
-    iter(arr, initial);
+iter(arr, initial);
 };
 
 let sum = fn(arr) {
     reduce(arr, 0, fn(initial, el) { initial + el });
 };
+sum([1, 2, 3, 4, 5]); // 15
 
-sum([1, 2, 3, 4, 5]);   // 15
+```
 
-// loops
+##### Loops
+
+```rs
 for {
     // action
 };
 
 let x = 0;
 for (x < 10) {
-    x = x + 1;  // TODO: implement "+=", "-="
+    x = x + 1; // TODO: implement "+=", "-="
 };
 
 for (i in 0..10) {
     println(i);
 };
 
-// Hash
+```
+
+##### Hash
+
+```rs
 let myHash = {"name": "Jimmy", "age": 72, "band": "Led Zeppelin"};
-myHash["name"]  // Jimmy
-myHash["age"]  // 72
+myHash["name"] // Jimmy
+myHash["age"] // 72
 
 ```
 
@@ -158,3 +184,7 @@ myHash["age"]  // 72
 - [ ] Error handling
 - [ ] Async and concurrency
 - [ ] std lib
+
+```
+
+```
