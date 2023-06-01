@@ -1,5 +1,7 @@
 mod test {
 
+    use std::any::{self, Any, TypeId};
+
     use crate::{
         lexer::lexer::Lexer,
         parser::ast::{Expression, Node, Statement},
@@ -19,7 +21,7 @@ mod test {
         let l = Lexer::new(input);
         let mut p = Parser::new(l);
 
-        let program = p.parse_program().expect("parse_program() return none");
+        let program = p.parse_program().expect("parse_program() return some");
         assert_eq!(chack_parser_errors(&p), false);
         assert_eq!(
             program.statements.len(),
@@ -47,7 +49,7 @@ mod test {
         let mut i = 0;
         for tt in tests {
             let stmt = program.statements.get(i).unwrap();
-            let_statemnt(stmt, tt.expected_identifier);
+            let_statemnt(stmt, &tt.expected_identifier);
             i += 1;
         }
     }
@@ -65,7 +67,7 @@ mod test {
         let l = Lexer::new(input);
         let mut p = Parser::new(l);
 
-        let program = p.parse_program().expect("parse_program() return none");
+        let program = p.parse_program().expect("parse_program() not return none");
         assert_eq!(chack_parser_errors(&p), false);
         assert_eq!(
             program.statements.len(),
@@ -90,7 +92,7 @@ mod test {
 
         let l = Lexer::new(input);
         let mut p = Parser::new(l);
-        let program = p.parse_program().expect("parse_program() return none");
+        let program = p.parse_program().expect("parse_program() return some");
 
         assert_eq!(chack_parser_errors(&p), false);
         assert_eq!(
@@ -105,7 +107,7 @@ mod test {
             .get(0)
             .expect("expected statemnt[0] to have a value")
             .get_expression_stmt()
-            .expect("program.Statements[0] is not ast.ExpressionStatement");
+            .expect("program.Statements[0] is ast.ExpressionStatement");
 
         let ident = match &stmt.expression {
             Some(ident) => match ident.get_ident() {
@@ -136,7 +138,7 @@ mod test {
 
         let l = Lexer::new(input);
         let mut p = Parser::new(l);
-        let program = p.parse_program().expect("parse_program() return none");
+        let program = p.parse_program().expect("parse_program() return some");
 
         assert_eq!(chack_parser_errors(&p), false);
         assert_eq!(
@@ -151,7 +153,7 @@ mod test {
             .get(0)
             .expect("expected statemnt[0] to have a value")
             .get_expression_stmt()
-            .expect("program.Statements[0] is not ast.ExpressionStatement");
+            .expect("program.Statements[0] is ast.ExpressionStatement");
 
         let ident = match &stmt.expression {
             Some(ident) => match ident.get_int_literal() {
@@ -200,7 +202,7 @@ mod test {
         for tt in tests {
             let l = Lexer::new(tt.input);
             let mut p = Parser::new(l);
-            let program = p.parse_program().expect("parse_program() return none");
+            let program = p.parse_program().expect("parse_program() return some");
 
             assert_eq!(chack_parser_errors(&p), false);
             assert_eq!(
@@ -215,7 +217,7 @@ mod test {
                 .get(0)
                 .expect("expected statemnt[0] to have a value")
                 .get_expression_stmt()
-                .expect("program.Statements[0] is not ast.ExpressionStatement");
+                .expect("program.Statements[0] is ast.ExpressionStatement");
 
             let exp = match &stmt.expression {
                 Some(exp) => match exp.get_prefix_exp() {
@@ -298,7 +300,7 @@ mod test {
         for tt in tests {
             let l = Lexer::new(tt.input);
             let mut p = Parser::new(l);
-            let program = p.parse_program().expect("parse_program() return none");
+            let program = p.parse_program().expect("parse_program() return some");
 
             assert_eq!(chack_parser_errors(&p), false);
             assert_eq!(
@@ -313,25 +315,14 @@ mod test {
                 .get(0)
                 .expect("expected statemnt[0] to have a value")
                 .get_expression_stmt()
-                .expect("program.Statements[0] is not ast.ExpressionStatement");
+                .expect("program.Statements[0] is ast.ExpressionStatement");
 
             let exp = match &stmt.expression {
-                Some(exp) => match exp.get_infix_exp() {
-                    Some(exp) => exp,
-                    _ => panic!("exp is not Identifier"),
-                },
+                Some(exp) => {
+                    test_infix_expression(exp, &tt.left_value, &tt.operator, &tt.right_value)
+                }
                 _ => panic!("exp is none"),
             };
-
-            test_int_literal(&exp.left, tt.left_value);
-
-            assert_eq!(
-                exp.operator, tt.operator,
-                "ident.value not {}. got={}",
-                tt.operator, exp.operator
-            );
-
-            test_int_literal(exp.right.as_ref().unwrap(), tt.right_value)
         }
     }
 
@@ -412,6 +403,24 @@ mod test {
         }
     }
 
+    //utils
+    fn test_infix_expression(
+        exp: &Box<dyn Expression>,
+        left: &dyn Any,
+        operator: &str,
+        right: &dyn Any,
+    ) {
+        let opExp = exp.get_infix_exp().expect("exp is OperatorExpression");
+        test_literal_expression(&opExp.left, left);
+        assert_eq!(
+            opExp.operator, operator,
+            "exp.Operator is not {:?}. got={:?}",
+            operator, opExp.operator
+        );
+
+        test_literal_expression(opExp.right.as_ref().unwrap(), right);
+    }
+
     fn test_int_literal(il: &Box<dyn Expression>, value: i64) {
         let integ = il.get_int_literal().expect("il is not IntergerLiteral");
         assert_eq!(
@@ -429,7 +438,34 @@ mod test {
         )
     }
 
-    fn let_statemnt(s: &Box<dyn Statement>, name: String) {
+    fn test_identifier(il: &Box<dyn Expression>, value: &str) {
+        let ident = il.get_ident().expect("il is Identifier");
+        assert_eq!(
+            ident.value, value,
+            "ident.value not {}. got={}",
+            value, ident.value
+        );
+
+        assert_eq!(
+            ident.token_literal(),
+            value.to_string(),
+            "ident.token_literal not {}. got={}",
+            value,
+            ident.token_literal()
+        )
+    }
+
+    fn test_literal_expression(exp: &Box<dyn Expression>, expected: &dyn Any) {
+        if let Some(value) = expected.downcast_ref::<String>() {
+            test_identifier(exp, value);
+        } else if let Some(value) = expected.downcast_ref::<i64>() {
+            test_int_literal(exp, *value);
+        } else {
+            dbg!("type of exp not handled.");
+        }
+    }
+
+    fn let_statemnt(s: &Box<dyn Statement>, name: &str) {
         assert_eq!(
             s.token_literal(),
             "let",
