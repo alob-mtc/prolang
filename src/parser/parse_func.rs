@@ -1,8 +1,11 @@
 use crate::lexer::token::TokenType;
 
 use super::{
-    ast::{Expression, Identifier, InfixExpression, IntegerLiteral, PrefixExpression},
-    parser::{Parser, PREFIX},
+    ast::{
+        BooleanExpression, Expression, Identifier, InfixExpression, IntegerLiteral,
+        PrefixExpression,
+    },
+    parser::{Parser, LOWEST, PREFIX},
 };
 
 pub(crate) fn parse_infix_func(
@@ -41,6 +44,8 @@ pub(crate) fn parse_prefix_func(p: &mut Parser) -> Option<Box<dyn Expression>> {
         TokenType::INT => Some(parse_integer_literal(p)),
         TokenType::BANG => parse_prefix_expression(p),
         TokenType::MINUS => parse_prefix_expression(p),
+        TokenType::TRUE | TokenType::FALSE => Some(parse_boolean(p)),
+        TokenType::LPAREN => parse_grouped_expression(p),
         _ => None,
     }
 }
@@ -72,4 +77,20 @@ fn parse_integer_literal(p: &Parser) -> Box<dyn Expression> {
         token: p.cur_token.clone(),
         value: p.cur_token.literal.parse().unwrap(),
     })
+}
+
+fn parse_boolean(p: &Parser) -> Box<dyn Expression> {
+    Box::new(BooleanExpression {
+        token: p.cur_token.clone(),
+        value: p.cur_token_is(TokenType::TRUE),
+    })
+}
+
+fn parse_grouped_expression(p: &mut Parser) -> Option<Box<dyn Expression>> {
+    p.next_token();
+    let exp = p.parse_expression(LOWEST);
+    if !p.expect_peek(TokenType::RPAREN) {
+        return None;
+    }
+    exp
 }

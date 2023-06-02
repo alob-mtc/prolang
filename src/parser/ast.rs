@@ -27,6 +27,9 @@ pub trait Expression: Node {
     fn get_infix_exp(&self) -> Option<&InfixExpression> {
         None
     }
+    fn get_bool_exp(&self) -> Option<&BooleanExpression> {
+        None
+    }
 }
 
 pub struct Program {
@@ -165,6 +168,27 @@ impl Node for IntegerLiteral {
 
 impl Expression for IntegerLiteral {
     fn get_int_literal(&self) -> Option<&IntegerLiteral> {
+        Some(self)
+    }
+}
+
+pub struct BooleanExpression {
+    pub token: Token,
+    pub value: bool,
+}
+
+impl Node for BooleanExpression {
+    fn token_literal(&self) -> String {
+        self.token.literal.to_owned()
+    }
+
+    fn string(&self) -> String {
+        self.token.literal.to_owned()
+    }
+}
+
+impl Expression for BooleanExpression {
+    fn get_bool_exp(&self) -> Option<&BooleanExpression> {
         Some(self)
     }
 }

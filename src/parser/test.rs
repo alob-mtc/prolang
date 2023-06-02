@@ -1,4 +1,4 @@
-use std::any::{self, Any, TypeId};
+use std::any::Any;
 
 use crate::{
     lexer::lexer::Lexer,
@@ -237,61 +237,79 @@ fn test_parsing_prefix_expression() {
 
 #[test]
 fn test_parsing_infix_expression() {
-    struct TestCase {
+    struct TestCase<'a> {
         input: String,
-        left_value: i64,
+        left_value: &'a dyn Any,
         operator: String,
-        right_value: i64,
+        right_value: &'a dyn Any,
     }
 
     let tests = vec![
         TestCase {
             input: String::from("5 + 5;"),
-            left_value: 5,
+            left_value: &5,
             operator: String::from("+"),
-            right_value: 5,
+            right_value: &5,
         },
         TestCase {
             input: String::from("5 - 5;"),
-            left_value: 5,
+            left_value: &5,
             operator: String::from("-"),
-            right_value: 5,
+            right_value: &5,
         },
         TestCase {
             input: String::from("5 * 5;"),
-            left_value: 5,
+            left_value: &5,
             operator: String::from("*"),
-            right_value: 5,
+            right_value: &5,
         },
         TestCase {
             input: String::from("5 / 5;"),
-            left_value: 5,
+            left_value: &5,
             operator: String::from("/"),
-            right_value: 5,
+            right_value: &5,
         },
         TestCase {
             input: String::from("5 > 5;"),
-            left_value: 5,
+            left_value: &5,
             operator: String::from(">"),
-            right_value: 5,
+            right_value: &5,
         },
         TestCase {
             input: String::from("5 < 5;"),
-            left_value: 5,
+            left_value: &5,
             operator: String::from("<"),
-            right_value: 5,
+            right_value: &5,
         },
         TestCase {
             input: String::from("5 == 5;"),
-            left_value: 5,
+            left_value: &5,
             operator: String::from("=="),
-            right_value: 5,
+            right_value: &5,
         },
         TestCase {
             input: String::from("5 != 5;"),
-            left_value: 5,
+            left_value: &5,
             operator: String::from("!="),
-            right_value: 5,
+            right_value: &5,
+        },
+        TestCase {
+            input: String::from("true == true;"),
+            left_value: &true,
+            operator: String::from("=="),
+            right_value: &true,
+        },
+        TestCase {
+            input: String::from("true != false;"),
+            left_value: &true,
+            operator: String::from("!="),
+            right_value: &false,
+        },
+        TestCase {
+            input: String::from("false == false;"),
+            left_value: &false,
+            operator: String::from("=="),
+            right_value: &false,
         },
     ];
 
@@ -330,6 +348,22 @@ fn test_operator_precedence_parsing() {
     }
 
     let tests = vec![
+        TestCase {
+            input: String::from("true"),
+            expected: String::from("true"),
+        },
+        TestCase {
+            input: String::from("false"),
+            expected: String::from("false"),
+        },
+        TestCase {
+            input: String::from("3 > 5 == false"),
+            expected: String::from("((3 > 5) == false)"),
+        },
+        TestCase {
+            input: String::from("3 < 5 == true"),
+            expected: String::from("((3 < 5) == true)"),
+        },
         TestCase {
             input: String::from("-a * b"),
             expected: String::from("((-a) * b)"),
@@ -382,6 +416,26 @@ fn test_operator_precedence_parsing() {
             input: String::from("3 + 4 * 5 == 3 * 1 + 4 * 5"),
             expected: String::from("((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"),
         },
+        TestCase {
+            input: String::from("1 + (2 + 3) + 4"),
+            expected: String::from("((1 + (2 + 3)) + 4)"),
+        },
+        TestCase {
+            input: String::from("(5 + 5) * 2"),
+            expected: String::from("((5 + 5) * 2)"),
+        },
+        TestCase {
+            input: String::from("2 / (5 + 5)"),
+            expected: String::from("(2 / (5 + 5))"),
+        },
+        TestCase {
+            input: String::from("-(5 + 5)"),
+            expected: String::from("(-(5 + 5))"),
+        },
+        TestCase {
+            input: String::from("!(true == true)"),
+            expected: String::from("(!(true == true))"),
+        },
     ];
 
     for tt in tests {
@@ -406,15 +460,15 @@ fn test_infix_expression(
     operator: &str,
     right: &dyn Any,
 ) {
-    let opExp = exp.get_infix_exp().expect("exp is OperatorExpression");
-    test_literal_expression(&opExp.left, left);
+    let op_exp = exp.get_infix_exp().expect("exp is OperatorExpression");
+    test_literal_expression(&op_exp.left, left);
     assert_eq!(
-        opExp.operator, operator,
+        op_exp.operator, operator,
         "exp.Operator is not {:?}. got={:?}",
-        operator, opExp.operator
+        operator, op_exp.operator
     );
 
-    test_literal_expression(opExp.right.as_ref().unwrap(), right);
+    test_literal_expression(op_exp.right.as_ref().unwrap(), right);
 }
 
 fn test_int_literal(il: &Box<dyn Expression>, value: i64) {
@@ -451,11 +505,25 @@ fn test_identifier(il: &Box<dyn Expression>, value: &str) {
     )
 }
 
+fn test_boolean_literal(il: &Box<dyn Expression>, value: bool) {
+    let bo = il.get_bool_exp().expect("il is Boolean");
+    assert_eq!(bo.value, value, "bo.value not {}. got={}", bo.value, value);
+    assert_eq!(
+        bo.token_literal(),
+        value.to_string(),
+        "bo.value not {}. got={}",
+        bo.value,
+        value
+    );
+}
+
 fn test_literal_expression(exp: &Box<dyn Expression>, expected: &dyn Any) {
     if let Some(value) = expected.downcast_ref::<String>() {
         test_identifier(exp, value);
-    } else if let Some(value) = expected.downcast_ref::<i64>() {
-        test_int_literal(exp, *value);
+    } else if let Some(&value) = expected.downcast_ref::<i64>() {
+        test_int_literal(exp, value);
+    } else if let Some(&value) = expected.downcast_ref::<bool>() {
+        test_boolean_literal(exp, value);
     } else {
         dbg!("type of exp not handled.");
     }

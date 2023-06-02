@@ -6,7 +6,7 @@ use crate::lexer::token::{Token, TokenType};
 use super::ast::{Expression, ExpressionStatement, Identifier, LetStatement, Program, Statement};
 use super::parse_func::{parse_infix_func, parse_prefix_func};
 
-const LOWEST: i32 = 1;
+pub(crate) const LOWEST: i32 = 1;
 const EQUALS: i32 = 2; // ==
 const LESSGREATER: i32 = 3; // > or <
 const SUM: i32 = 4; // +
@@ -171,13 +171,13 @@ impl Parser {
         self.peek_token = self.l.next_token();
     }
 
-    fn cur_token_is(&self, t: TokenType) -> bool {
+    pub(crate) fn cur_token_is(&self, t: TokenType) -> bool {
         self.cur_token.token_type == t
     }
     fn peek_token_is(&self, t: &TokenType) -> bool {
         self.peek_token.token_type == *t
     }
-    fn expect_peek(&mut self, t: TokenType) -> bool {
+    pub(crate) fn expect_peek(&mut self, t: TokenType) -> bool {
         if self.peek_token_is(&t) {
             self.next_token();
             return true;
