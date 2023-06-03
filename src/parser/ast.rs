@@ -1,7 +1,7 @@
 use crate::lexer::token::Token;
 
 pub trait Node {
-    fn token_literal(&self) -> String;
+    fn token_literal(&self) -> &str;
     fn string(&self) -> String;
 }
 
@@ -37,11 +37,11 @@ pub struct Program {
 }
 
 impl Node for Program {
-    fn token_literal(&self) -> String {
+    fn token_literal(&self) -> &str {
         if !self.statements.is_empty() {
             return self.statements.get(0).unwrap().token_literal();
         }
-        "".to_string()
+        ""
     }
     fn string(&self) -> String {
         let mut out = String::new();
@@ -59,8 +59,8 @@ pub struct LetStatement {
 }
 
 impl Node for LetStatement {
-    fn token_literal(&self) -> String {
-        self.token.literal.to_owned()
+    fn token_literal(&self) -> &str {
+        &self.token.literal
     }
     fn string(&self) -> String {
         let mut out = String::new();
@@ -90,8 +90,8 @@ pub struct Identifier {
 }
 
 impl Node for Identifier {
-    fn token_literal(&self) -> String {
-        self.token.literal.to_owned()
+    fn token_literal(&self) -> &str {
+        &self.token.literal
     }
     fn string(&self) -> String {
         self.value.to_owned()
@@ -110,8 +110,8 @@ pub struct ExpressionStatement {
 }
 
 impl Node for ExpressionStatement {
-    fn token_literal(&self) -> String {
-        self.token.literal.to_owned()
+    fn token_literal(&self) -> &str {
+        &self.token.literal
     }
     fn string(&self) -> String {
         if let Some(value) = &self.expression {
@@ -136,8 +136,8 @@ pub struct ReturnStatemnt {
 impl Statement for ReturnStatemnt {}
 
 impl Node for ReturnStatemnt {
-    fn token_literal(&self) -> String {
-        self.token.literal.to_owned()
+    fn token_literal(&self) -> &str {
+        &self.token.literal
     }
     fn string(&self) -> String {
         let mut out = String::new();
@@ -157,8 +157,8 @@ pub struct IntegerLiteral {
 }
 
 impl Node for IntegerLiteral {
-    fn token_literal(&self) -> String {
-        self.token.literal.to_owned()
+    fn token_literal(&self) -> &str {
+        &self.token.literal
     }
 
     fn string(&self) -> String {
@@ -178,8 +178,8 @@ pub struct BooleanExpression {
 }
 
 impl Node for BooleanExpression {
-    fn token_literal(&self) -> String {
-        self.token.literal.to_owned()
+    fn token_literal(&self) -> &str {
+        &self.token.literal
     }
 
     fn string(&self) -> String {
@@ -206,8 +206,8 @@ impl Expression for PrefixExpression {
 }
 
 impl Node for PrefixExpression {
-    fn token_literal(&self) -> String {
-        self.token.literal.to_owned()
+    fn token_literal(&self) -> &str {
+        &self.token.literal
     }
 
     fn string(&self) -> String {
@@ -235,8 +235,8 @@ impl Expression for InfixExpression {
 }
 
 impl Node for InfixExpression {
-    fn token_literal(&self) -> String {
-        self.token.literal.to_owned()
+    fn token_literal(&self) -> &str {
+        &self.token.literal
     }
 
     fn string(&self) -> String {

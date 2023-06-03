@@ -178,22 +178,32 @@ fn test_integer_literal_expression() {
 
 #[test]
 fn test_parsing_prefix_expression() {
-    struct TestCase {
+    struct TestCase<'a> {
         input: String,
         operator: String,
-        integer_value: i64,
+        integer_value: &'a dyn Any,
     }
 
     let tests = vec![
         TestCase {
             input: String::from("!5"),
             operator: String::from("!"),
-            integer_value: 5,
+            integer_value: &5,
         },
         TestCase {
             input: String::from("-15"),
             operator: String::from("-"),
-            integer_value: 15,
+            integer_value: &15,
+        },
+        TestCase {
+            input: String::from("!true"),
+            operator: String::from("!"),
+            integer_value: &true,
+        },
+        TestCase {
+            input: String::from("!false"),
+            operator: String::from("!"),
+            integer_value: &false,
         },
     ];
 
@@ -231,7 +241,7 @@ fn test_parsing_prefix_expression() {
             tt.operator, exp.operator
         );
 
-        test_int_literal(exp.right.as_ref().unwrap(), tt.integer_value)
+        test_literal_expression(exp.right.as_ref().unwrap(), tt.integer_value);
     }
 }
 
