@@ -32,7 +32,7 @@ let result = add(one, two);
 ##### If-expression
 
 ```rs
-let d = if (c > a) { return 99 } else { return 100 };
+let d = if (c > a) { 99 } else { 100 };
 ```
 
 ##### Function-expression & function-closure: higher-order
@@ -184,7 +184,3 @@ myHash["age"] // 72
 - [ ] Error handling
 - [ ] Async and concurrency
 - [ ] std lib
-
-```
-
-```
