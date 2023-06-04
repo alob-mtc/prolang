@@ -27,7 +27,10 @@ pub trait Expression: Node {
     fn get_infix_exp(&self) -> Option<&InfixExpression> {
         None
     }
-    fn get_bool_exp(&self) -> Option<&BooleanExpression> {
+    fn get_bool_literal(&self) -> Option<&BooleanLiteral> {
+        None
+    }
+    fn get_if_exp(&self) -> Option<&IfExpression> {
         None
     }
 }
@@ -172,12 +175,12 @@ impl Expression for IntegerLiteral {
     }
 }
 
-pub struct BooleanExpression {
+pub struct BooleanLiteral {
     pub token: Token,
     pub value: bool,
 }
 
-impl Node for BooleanExpression {
+impl Node for BooleanLiteral {
     fn token_literal(&self) -> &str {
         &self.token.literal
     }
@@ -187,8 +190,8 @@ impl Node for BooleanExpression {
     }
 }
 
-impl Expression for BooleanExpression {
-    fn get_bool_exp(&self) -> Option<&BooleanExpression> {
+impl Expression for BooleanLiteral {
+    fn get_bool_literal(&self) -> Option<&BooleanLiteral> {
         Some(self)
     }
 }
@@ -248,6 +251,60 @@ impl Node for InfixExpression {
         out.push(' ');
         out.push_str(&self.right.as_ref().unwrap().string());
         out.push(')');
+
+        out
+    }
+}
+
+pub struct IfExpression {
+    pub token: Token,
+    pub condition: Option<Box<dyn Expression>>,
+    pub consequence: Option<BlockStatement>,
+    pub alternative: Option<BlockStatement>,
+}
+
+impl Node for IfExpression {
+    fn token_literal(&self) -> &str {
+        &self.token.literal
+    }
+
+    fn string(&self) -> String {
+        let mut out = String::new();
+        out.push_str("if");
+        out.push_str(&self.condition.as_ref().unwrap().string());
+        out.push(' ');
+        out.push_str(&self.consequence.as_ref().unwrap().string());
+        if let Some(alt) = &self.alternative {
+            out.push_str("else ");
+            out.push_str(&alt.string())
+        }
+
+        out
+    }
+}
+
+impl Expression for IfExpression {
+    fn get_if_exp(&self) -> Option<&IfExpression> {
+        Some(self)
+    }
+}
+
+pub struct BlockStatement {
+    pub token: Token,
+    pub statements: Vec<Box<dyn Statement>>,
+}
+
+impl Node for BlockStatement {
+    fn token_literal(&self) -> &str {
+        &self.token.literal
+    }
+
+    fn string(&self) -> String {
+        let mut out = String::new();
+
+        for s in &self.statements {
+            out.push_str(&s.string());
+        }
 
         out
     }

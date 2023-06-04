@@ -177,6 +177,62 @@ fn test_integer_literal_expression() {
 }
 
 #[test]
+fn test_if_expression() {
+    let input = String::from("if (x < y) { x } else {}");
+
+    let l = Lexer::new(input);
+    let mut p = Parser::new(l);
+    let program = p.parse_program().expect("parse_program() return some");
+
+    assert_eq!(chack_parser_errors(&p), false);
+    assert_eq!(
+        program.statements.len(),
+        1,
+        "program.statements does not contain 1 statements. got={}",
+        program.statements.len()
+    );
+
+    let stmt = program
+        .statements
+        .get(0)
+        .expect("expected statemnt[0] to have a value")
+        .get_expression_stmt()
+        .expect("program.Statements[0] is ast.ExpressionStatement");
+
+    let ifexp = match &stmt.expression {
+        Some(ifexp) => match ifexp.get_if_exp() {
+            Some(ifexp) => ifexp,
+            _ => panic!("exp is not If expression"),
+        },
+        _ => panic!("exp is none"),
+    };
+
+    test_infix_expression(ifexp.condition.as_ref().unwrap(), &"x", "<", &"y");
+    assert_eq!(
+        ifexp.consequence.as_ref().unwrap().statements.len(),
+        1,
+        "consequence is not 1 statements. got={}",
+        ifexp.consequence.as_ref().unwrap().statements.len()
+    );
+
+    let consequence = ifexp
+        .consequence
+        .as_ref()
+        .unwrap()
+        .statements
+        .get(0)
+        .expect("expected statemnt[0] to have a value")
+        .get_expression_stmt()
+        .expect("statements[0] is ast.ExpressionStatement");
+    test_identifier(consequence.expression.as_ref().unwrap(), "x");
+    assert_eq!(
+        ifexp.alternative.is_some(),
+        true,
+        "alternative was not some.",
+    )
+}
+
+#[test]
 fn test_parsing_prefix_expression() {
     struct TestCase<'a> {
         input: String,
@@ -343,7 +399,7 @@ fn test_parsing_infix_expression() {
             .get_expression_stmt()
             .expect("program.Statements[0] is ast.ExpressionStatement");
 
-        let exp = match &stmt.expression {
+        match &stmt.expression {
             Some(exp) => test_infix_expression(exp, &tt.left_value, &tt.operator, &tt.right_value),
             _ => panic!("exp is none"),
         };
@@ -516,7 +572,7 @@ fn test_identifier(il: &Box<dyn Expression>, value: &str) {
 }
 
 fn test_boolean_literal(il: &Box<dyn Expression>, value: bool) {
-    let bo = il.get_bool_exp().expect("il is Boolean");
+    let bo = il.get_bool_literal().expect("il is Boolean");
     assert_eq!(bo.value, value, "bo.value not {}. got={}", bo.value, value);
     assert_eq!(
         bo.token_literal(),

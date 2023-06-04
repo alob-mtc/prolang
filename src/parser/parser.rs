@@ -3,7 +3,10 @@ use std::collections::HashMap;
 use crate::lexer::lexer::Lexer;
 use crate::lexer::token::{Token, TokenType};
 
-use super::ast::{Expression, ExpressionStatement, Identifier, LetStatement, Program, Statement};
+use super::ast::{
+    BlockStatement, Expression, ExpressionStatement, Identifier, IfExpression, LetStatement,
+    Program, Statement,
+};
 use super::parse_func::{parse_infix_func, parse_prefix_func};
 
 pub(crate) const LOWEST: i32 = 1;
@@ -106,6 +109,24 @@ impl Parser {
         Some(Box::new(stmt))
     }
 
+    pub(crate) fn parse_block_statement(&mut self) -> Option<BlockStatement> {
+        let mut block = BlockStatement {
+            token: self.cur_token.clone(),
+            statements: vec![],
+        };
+
+        self.next_token();
+
+        while !self.cur_token_is(TokenType::RBRACE) && !self.cur_token_is(TokenType::EOF) {
+            if let Some(stmt) = self.parse_statement() {
+                block.statements.push(stmt);
+            }
+            self.next_token()
+        }
+
+        Some(block)
+    }
+
     fn parse_expression_statment(&mut self) -> Option<Box<dyn Statement>> {
         let stmt = ExpressionStatement {
             token: self.cur_token.clone(),
@@ -174,7 +195,7 @@ impl Parser {
     pub(crate) fn cur_token_is(&self, t: TokenType) -> bool {
         self.cur_token.token_type == t
     }
-    fn peek_token_is(&self, t: &TokenType) -> bool {
+    pub(crate) fn peek_token_is(&self, t: &TokenType) -> bool {
         self.peek_token.token_type == *t
     }
     pub(crate) fn expect_peek(&mut self, t: TokenType) -> bool {
