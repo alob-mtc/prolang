@@ -138,8 +138,8 @@ impl Statement for ExpressionStatement {
 }
 
 pub struct ReturnStatemnt {
-    token: Token,
-    return_value: Option<Box<dyn Expression>>,
+    pub token: Token,
+    pub return_value: Option<Box<dyn Expression>>,
 }
 
 impl Statement for ReturnStatemnt {}

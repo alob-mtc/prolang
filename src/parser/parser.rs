@@ -4,7 +4,8 @@ use crate::lexer::lexer::Lexer;
 use crate::lexer::token::{Token, TokenType};
 
 use super::ast::{
-    BlockStatement, Expression, ExpressionStatement, Identifier, LetStatement, Program, Statement,
+    BlockStatement, Expression, ExpressionStatement, Identifier, LetStatement, Program,
+    ReturnStatemnt, Statement,
 };
 use super::parse_func::{parse_infix_func, parse_prefix_func};
 
@@ -83,26 +84,28 @@ impl Parser {
             return None;
         }
 
-        // TODO: skipping the expressions until we encounter ;
-        while !self.cur_token_is(TokenType::SEMICOLON) {
-            self.next_token()
+        self.next_token();
+        stmt.value = self.parse_expression(LOWEST);
+
+        if self.peek_token_is(&TokenType::SEMICOLON) {
+            self.next_token();
         }
 
         Some(Box::new(stmt))
     }
 
     fn parse_return_statement(&mut self) -> Option<Box<dyn Statement>> {
-        let stmt = LetStatement {
+        let mut stmt = ReturnStatemnt {
             token: self.cur_token.clone(),
-            value: None,
-            name: Identifier::default(),
+            return_value: None,
         };
 
         self.next_token();
 
-        // TODO: skipping the expressions until we encounter ;
-        while !self.cur_token_is(TokenType::SEMICOLON) {
-            self.next_token()
+        stmt.return_value = self.parse_expression(LOWEST);
+
+        if self.peek_token_is(&TokenType::SEMICOLON) {
+            self.next_token();
         }
 
         Some(Box::new(stmt))

@@ -32,7 +32,7 @@ fn test_let_statement() {
         expected_identifier: String,
     }
 
-    let tests = vec![
+    let tests = [
         TestCase {
             expected_identifier: String::from("x"),
         },
@@ -47,8 +47,53 @@ fn test_let_statement() {
     let mut i = 0;
     for tt in tests {
         let stmt = program.statements.get(i).unwrap();
-        let_statemnt(&Box::new(stmt.as_ref()), &tt.expected_identifier);
+        let_statemnt(stmt, &tt.expected_identifier);
         i += 1;
+    }
+}
+
+#[test]
+fn test_let_statements() {
+    struct TestCase<'a> {
+        input: String,
+        expected_identifier: String,
+        expected_value: &'a dyn Any,
+    }
+
+    let tests = [
+        TestCase {
+            input: String::from("let x = 5;"),
+            expected_identifier: String::from("x"),
+            expected_value: &"y",
+        },
+        TestCase {
+            input: String::from("let y = true;"),
+            expected_identifier: String::from("y"),
+            expected_value: &"y",
+        },
+    ];
+
+    for tt in tests {
+        let l = Lexer::new(tt.input);
+        let mut p = Parser::new(l);
+
+        let program = p.parse_program().expect("parse_program() not return none");
+        assert_eq!(chack_parser_errors(&p), false);
+        assert_eq!(
+            program.statements.len(),
+            1,
+            "program.statements does not contain 1 statements. got={}",
+            program.statements.len()
+        );
+
+        let stmt = program.statements.get(0).unwrap();
+        let_statemnt(stmt, &tt.expected_identifier);
+        let let_exp = stmt.get_let().unwrap();
+
+        test_literal_expression(
+            &Box::new(let_exp.value.as_ref().unwrap().as_ref()),
+            tt.expected_value,
+        );
     }
 }
 
@@ -414,7 +459,7 @@ fn test_parsing_prefix_expression() {
         integer_value: &'a dyn Any,
     }
 
-    let tests = vec![
+    let tests = [
         TestCase {
             input: String::from("!5"),
             operator: String::from("!"),
@@ -487,7 +532,7 @@ fn test_parsing_infix_expression() {
         right_value: &'a dyn Any,
     }
 
-    let tests = vec![
+    let tests = [
         TestCase {
             input: String::from("5 + 5;"),
             left_value: &5,
@@ -590,7 +635,7 @@ fn test_operator_precedence_parsing() {
         expected: String,
     }
 
-    let tests = vec![
+    let tests = [
         TestCase {
             input: String::from("true"),
             expected: String::from("true"),
@@ -784,7 +829,7 @@ fn test_literal_expression(exp: &Box<&dyn Expression>, expected: &dyn Any) {
     }
 }
 
-fn let_statemnt(s: &Box<&dyn Statement>, name: &str) {
+fn let_statemnt(s: &Box<dyn Statement>, name: &str) {
     assert_eq!(
         s.token_literal(),
         "let",
