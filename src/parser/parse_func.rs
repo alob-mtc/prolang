@@ -2,8 +2,8 @@ use crate::lexer::token::TokenType;
 
 use super::{
     ast::{
-        BooleanLiteral, Expression, Identifier, IfExpression, InfixExpression, IntegerLiteral,
-        PrefixExpression,
+        BooleanLiteral, CallExpression, Expression, FunctionLiteral, Identifier, IfExpression,
+        InfixExpression, IntegerLiteral, PrefixExpression,
     },
     parser::{Parser, LOWEST, PREFIX},
 };
@@ -21,6 +21,7 @@ pub(crate) fn parse_infix_func(
         | TokenType::NotEq
         | TokenType::LT
         | TokenType::GT => Some(parse_infix_expression(p, left)),
+        TokenType::LPAREN => Some(parse_call_epression(p, left)),
         _ => None,
     }
 }
@@ -38,6 +39,16 @@ fn parse_infix_expression(p: &mut Parser, left: Box<dyn Expression>) -> Box<dyn 
     expression
 }
 
+fn parse_call_epression(p: &mut Parser, function: Box<dyn Expression>) -> Box<dyn Expression> {
+    let exp = CallExpression {
+        token: p.cur_token.clone(),
+        function,
+        arguments: p.parse_call_argument(),
+    };
+
+    Box::new(exp)
+}
+
 pub(crate) fn parse_prefix_func(p: &mut Parser) -> Option<Box<dyn Expression>> {
     match p.cur_token.token_type {
         TokenType::IDENT => Some(parse_identifier(p)),
@@ -47,6 +58,7 @@ pub(crate) fn parse_prefix_func(p: &mut Parser) -> Option<Box<dyn Expression>> {
         TokenType::TRUE | TokenType::FALSE => Some(parse_boolean(p)),
         TokenType::LPAREN => parse_grouped_expression(p),
         TokenType::IF => parse_if_expression(p),
+        TokenType::FUNCTION => parse_fn_literal(p),
         _ => None,
     }
 }
@@ -130,4 +142,27 @@ fn parse_if_expression(p: &mut Parser) -> Option<Box<dyn Expression>> {
     }
 
     Some(Box::new(expression))
+}
+
+fn parse_fn_literal(p: &mut Parser) -> Option<Box<dyn Expression>> {
+    let mut lit = FunctionLiteral {
+        token: p.cur_token.clone(),
+        parameters: vec![],
+        body: None,
+    };
+    if !p.expect_peek(TokenType::LPAREN) {
+        return None;
+    }
+
+    if let Some(params) = p.parse_fn_parameters() {
+        lit.parameters = params;
+    }
+
+    if !p.expect_peek(TokenType::LBRACE) {
+        return None;
+    }
+
+    lit.body = p.parse_block_statement();
+
+    Some(Box::new(lit))
 }

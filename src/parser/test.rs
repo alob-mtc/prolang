@@ -47,7 +47,7 @@ fn test_let_statement() {
     let mut i = 0;
     for tt in tests {
         let stmt = program.statements.get(i).unwrap();
-        let_statemnt(stmt, &tt.expected_identifier);
+        let_statemnt(&Box::new(stmt.as_ref()), &tt.expected_identifier);
         i += 1;
     }
 }
@@ -224,12 +224,186 @@ fn test_if_expression() {
         .expect("expected statemnt[0] to have a value")
         .get_expression_stmt()
         .expect("statements[0] is ast.ExpressionStatement");
-    test_identifier(consequence.expression.as_ref().unwrap(), "x");
+
+    test_identifier(
+        &Box::new(consequence.expression.as_ref().unwrap().as_ref()),
+        "x",
+    );
     assert_eq!(
         ifexp.alternative.is_some(),
         true,
         "alternative was not some.",
     )
+}
+
+#[test]
+fn test_function_literal_parsing() {
+    let input = String::from("fn(x, y) { x + y; }");
+
+    let l = Lexer::new(input);
+    let mut p = Parser::new(l);
+    let program = p.parse_program().expect("parse_program() return some");
+
+    assert_eq!(chack_parser_errors(&p), false);
+    assert_eq!(
+        program.statements.len(),
+        1,
+        "program.statements does not contain 1 statements. got={}",
+        program.statements.len()
+    );
+
+    let stmt = program
+        .statements
+        .get(0)
+        .expect("expected statemnt[0] to have a value")
+        .get_expression_stmt()
+        .expect("program.Statements[0] is ast.ExpressionStatement");
+
+    let fn_literal = match &stmt.expression {
+        Some(fn_literal) => match fn_literal.get_fn_literal() {
+            Some(fn_literal) => fn_literal,
+            _ => panic!("exp is not If expression"),
+        },
+        _ => panic!("exp is none"),
+    };
+
+    assert_eq!(
+        fn_literal.parameters.len(),
+        2,
+        "function literal parameters wrong. want 2, got={}",
+        fn_literal.parameters.len()
+    );
+
+    let x = &Box::new(fn_literal.parameters.get(0).unwrap() as &dyn Expression);
+    let y = &Box::new(fn_literal.parameters.get(1).unwrap() as &dyn Expression);
+
+    test_literal_expression(x, &"x");
+    test_literal_expression(y, &"y");
+
+    match fn_literal
+        .body
+        .as_ref()
+        .unwrap()
+        .statements
+        .get(0)
+        .unwrap()
+        .get_expression_stmt()
+    {
+        Some(body_stmt) => match &body_stmt.expression {
+            Some(exp) => test_infix_expression(exp, &"x", "+", &"y"),
+            _ => panic!("function body stmt is not ast.ExpressionStatement"),
+        },
+        _ => panic!("function body stmt is not ast.ExpressionStatement"),
+    }
+}
+
+#[test]
+fn test_function_parameter_parsing() {
+    struct TestCase {
+        input: String,
+        expected_params: Vec<String>,
+    }
+
+    let tests = [
+        TestCase {
+            input: String::from("fn() {};"),
+            expected_params: vec![],
+        },
+        TestCase {
+            input: String::from("fn(x) {};"),
+            expected_params: vec![String::from("x")],
+        },
+        TestCase {
+            input: String::from("fn(x, y, z) {};"),
+            expected_params: vec![String::from("x"), String::from("y"), String::from("z")],
+        },
+    ];
+
+    for tt in tests {
+        let l = Lexer::new(tt.input);
+        let mut p = Parser::new(l);
+        let program = p.parse_program().expect("parse_program() return some");
+
+        assert_eq!(chack_parser_errors(&p), false);
+        assert_eq!(
+            program.statements.len(),
+            1,
+            "program.statements does not contain 1 statements. got={}",
+            program.statements.len()
+        );
+
+        let stmt = program
+            .statements
+            .get(0)
+            .expect("expected statemnt[0] to have a value")
+            .get_expression_stmt()
+            .expect("program.Statements[0] is ast.ExpressionStatement");
+
+        let fn_literal = match &stmt.expression {
+            Some(fn_literal) => match fn_literal.get_fn_literal() {
+                Some(fn_literal) => fn_literal,
+                _ => panic!("exp is not If expression"),
+            },
+            _ => panic!("exp is none"),
+        };
+
+        assert_eq!(
+            fn_literal.parameters.len(),
+            tt.expected_params.len(),
+            "function literal parameters wrong. want {}, got={}",
+            tt.expected_params.len(),
+            fn_literal.parameters.len()
+        );
+
+        for (i, ident) in tt.expected_params.iter().enumerate() {
+            let p = &Box::new(fn_literal.parameters.get(i).unwrap() as &dyn Expression);
+            test_literal_expression(p, ident);
+        }
+    }
+}
+
+#[test]
+fn test_call_expression_parsing() {
+    let input = String::from("add(1, 2 * 3, 4 + 5)");
+
+    let l = Lexer::new(input);
+    let mut p = Parser::new(l);
+    let program = p.parse_program().expect("parse_program() return some");
+
+    assert_eq!(chack_parser_errors(&p), false);
+    assert_eq!(
+        program.statements.len(),
+        1,
+        "program.statements does not contain 1 statements. got={}",
+        program.statements.len()
+    );
+
+    let stmt = program
+        .statements
+        .get(0)
+        .expect("expected statemnt[0] to have a value")
+        .get_expression_stmt()
+        .expect("program.Statements[0] is ast.ExpressionStatement");
+
+    let exp = match &stmt.expression {
+        Some(exp) => match exp.get_call_exp() {
+            Some(exp) => exp,
+            _ => panic!("exp is not If expression"),
+        },
+        _ => panic!("exp is none"),
+    };
+
+    test_identifier(&Box::new(exp.function.as_ref()), "add");
+
+    assert_eq!(
+        exp.arguments.len(),
+        3,
+        "wrong legnth of arg. go={}",
+        exp.arguments.len()
+    );
+    test_literal_expression(&Box::new(exp.arguments.get(0).unwrap().as_ref()), &1);
+    test_infix_expression(exp.arguments.get(1).as_ref().unwrap(), &2, "*", &3);
+    test_infix_expression(exp.arguments.get(2).as_ref().unwrap(), &4, "+", &5);
 }
 
 #[test]
@@ -297,7 +471,10 @@ fn test_parsing_prefix_expression() {
             tt.operator, exp.operator
         );
 
-        test_literal_expression(exp.right.as_ref().unwrap(), tt.integer_value);
+        test_literal_expression(
+            &Box::new(exp.right.as_ref().unwrap().as_ref()),
+            tt.integer_value,
+        );
     }
 }
 
@@ -502,6 +679,18 @@ fn test_operator_precedence_parsing() {
             input: String::from("!(true == true)"),
             expected: String::from("(!(true == true))"),
         },
+        TestCase {
+            input: String::from("a + add(b * c) + d"),
+            expected: String::from("((a + add((b * c))) + d)"),
+        },
+        TestCase {
+            input: String::from("add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))"),
+            expected: String::from("add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))"),
+        },
+        TestCase {
+            input: String::from("add(a + b + c * d / f + g)"),
+            expected: String::from("add((((a + b) + ((c * d) / f)) + g))"),
+        },
     ];
 
     for tt in tests {
@@ -527,17 +716,17 @@ fn test_infix_expression(
     right: &dyn Any,
 ) {
     let op_exp = exp.get_infix_exp().expect("exp is OperatorExpression");
-    test_literal_expression(&op_exp.left, left);
+    test_literal_expression(&Box::new(op_exp.left.as_ref()), left);
     assert_eq!(
         op_exp.operator, operator,
         "exp.Operator is not {:?}. got={:?}",
         operator, op_exp.operator
     );
 
-    test_literal_expression(op_exp.right.as_ref().unwrap(), right);
+    test_literal_expression(&Box::new(op_exp.right.as_ref().unwrap().as_ref()), right);
 }
 
-fn test_int_literal(il: &Box<dyn Expression>, value: i64) {
+fn test_int_literal(il: &Box<&dyn Expression>, value: i64) {
     let integ = il.get_int_literal().expect("il is not IntergerLiteral");
     assert_eq!(
         integ.value, value,
@@ -554,7 +743,7 @@ fn test_int_literal(il: &Box<dyn Expression>, value: i64) {
     )
 }
 
-fn test_identifier(il: &Box<dyn Expression>, value: &str) {
+fn test_identifier(il: &Box<&dyn Expression>, value: &str) {
     let ident = il.get_ident().expect("il is Identifier");
     assert_eq!(
         ident.value, value,
@@ -571,7 +760,7 @@ fn test_identifier(il: &Box<dyn Expression>, value: &str) {
     )
 }
 
-fn test_boolean_literal(il: &Box<dyn Expression>, value: bool) {
+fn test_boolean_literal(il: &Box<&dyn Expression>, value: bool) {
     let bo = il.get_bool_literal().expect("il is Boolean");
     assert_eq!(bo.value, value, "bo.value not {}. got={}", bo.value, value);
     assert_eq!(
@@ -583,7 +772,7 @@ fn test_boolean_literal(il: &Box<dyn Expression>, value: bool) {
     );
 }
 
-fn test_literal_expression(exp: &Box<dyn Expression>, expected: &dyn Any) {
+fn test_literal_expression(exp: &Box<&dyn Expression>, expected: &dyn Any) {
     if let Some(value) = expected.downcast_ref::<String>() {
         test_identifier(exp, value);
     } else if let Some(&value) = expected.downcast_ref::<i64>() {
@@ -595,7 +784,7 @@ fn test_literal_expression(exp: &Box<dyn Expression>, expected: &dyn Any) {
     }
 }
 
-fn let_statemnt(s: &Box<dyn Statement>, name: &str) {
+fn let_statemnt(s: &Box<&dyn Statement>, name: &str) {
     assert_eq!(
         s.token_literal(),
         "let",

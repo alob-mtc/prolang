@@ -33,6 +33,12 @@ pub trait Expression: Node {
     fn get_if_exp(&self) -> Option<&IfExpression> {
         None
     }
+    fn get_fn_literal(&self) -> Option<&FunctionLiteral> {
+        None
+    }
+    fn get_call_exp(&self) -> Option<&CallExpression> {
+        None
+    }
 }
 
 pub struct Program {
@@ -307,6 +313,74 @@ impl Node for BlockStatement {
         }
 
         out
+    }
+}
+
+pub struct FunctionLiteral {
+    pub token: Token,
+    pub parameters: Vec<Identifier>,
+    pub body: Option<BlockStatement>,
+}
+
+impl Node for FunctionLiteral {
+    fn token_literal(&self) -> &str {
+        &self.token.literal
+    }
+
+    fn string(&self) -> String {
+        let mut out = String::new();
+        let mut params = vec![];
+
+        for p in &self.parameters {
+            params.push(p.string());
+        }
+        out.push_str(self.token_literal());
+        out.push('(');
+        out.push_str(params.join(", ").as_str());
+        out.push_str(") ");
+        if let Some(body) = &self.body {
+            out.push_str(&body.string());
+        }
+
+        out
+    }
+}
+
+impl Expression for FunctionLiteral {
+    fn get_fn_literal(&self) -> Option<&FunctionLiteral> {
+        Some(self)
+    }
+}
+
+pub struct CallExpression {
+    pub token: Token,
+    pub function: Box<dyn Expression>,
+    pub arguments: Vec<Box<dyn Expression>>,
+}
+
+impl Node for CallExpression {
+    fn token_literal(&self) -> &str {
+        &self.token.literal
+    }
+
+    fn string(&self) -> String {
+        let mut out = String::new();
+        let mut args = vec![];
+        for a in &self.arguments {
+            args.push(a.string());
+        }
+        out.push_str(&self.function.string());
+        out.push('(');
+        out.push_str(&args.join(", "));
+        out.push(')');
+
+        out
+    }
+}
+
+impl Expression for CallExpression {
+    fn get_call_exp(&self) -> Option<&CallExpression> {
+        Some(self)
     }
 }
 
