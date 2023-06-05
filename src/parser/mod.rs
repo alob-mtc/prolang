@@ -1,5 +1,5 @@
-mod ast;
+pub mod ast;
 mod parse_func;
-mod parser;
+pub mod parser;
 #[cfg(test)]
 mod test;
