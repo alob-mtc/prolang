@@ -151,6 +151,7 @@ impl Node for ReturnStatemnt {
     fn string(&self) -> String {
         let mut out = String::new();
         out.push_str(&self.token_literal());
+        out.push(' ');
         if let Some(return_value) = &self.return_value {
             out.push_str(&return_value.string());
         }
