@@ -4,8 +4,7 @@ use crate::lexer::lexer::Lexer;
 use crate::lexer::token::{Token, TokenType};
 
 use super::ast::{
-    BlockStatement, Expression, ExpressionStatement, Identifier, IfExpression, LetStatement,
-    Program, Statement,
+    BlockStatement, Expression, ExpressionStatement, Identifier, LetStatement, Program, Statement,
 };
 use super::parse_func::{parse_infix_func, parse_prefix_func};
 
@@ -109,24 +108,6 @@ impl Parser {
         Some(Box::new(stmt))
     }
 
-    pub(crate) fn parse_block_statement(&mut self) -> Option<BlockStatement> {
-        let mut block = BlockStatement {
-            token: self.cur_token.clone(),
-            statements: vec![],
-        };
-
-        self.next_token();
-
-        while !self.cur_token_is(TokenType::RBRACE) && !self.cur_token_is(TokenType::EOF) {
-            if let Some(stmt) = self.parse_statement() {
-                block.statements.push(stmt);
-            }
-            self.next_token()
-        }
-
-        Some(block)
-    }
-
     fn parse_expression_statment(&mut self) -> Option<Box<dyn Statement>> {
         let stmt = ExpressionStatement {
             token: self.cur_token.clone(),
@@ -158,6 +139,78 @@ impl Parser {
             }
         }
     }
+
+    pub(crate) fn parse_block_statement(&mut self) -> Option<BlockStatement> {
+        let mut block = BlockStatement {
+            token: self.cur_token.clone(),
+            statements: vec![],
+        };
+
+        self.next_token();
+
+        while !self.cur_token_is(TokenType::RBRACE) && !self.cur_token_is(TokenType::EOF) {
+            if let Some(stmt) = self.parse_statement() {
+                block.statements.push(stmt);
+            }
+            self.next_token()
+        }
+
+        Some(block)
+    }
+
+    pub(crate) fn parse_fn_parameters(&mut self) -> Option<Vec<Identifier>> {
+        let mut identifiers = vec![];
+        if self.peek_token_is(&TokenType::RPAREN) {
+            self.next_token();
+            return Some(identifiers);
+        }
+
+        self.next_token();
+
+        identifiers.push(Identifier {
+            token: self.cur_token.clone(),
+            value: self.cur_token.literal.to_owned(),
+        });
+
+        while self.peek_token_is(&TokenType::COMMA) {
+            self.next_token();
+            self.next_token();
+            identifiers.push(Identifier {
+                token: self.cur_token.clone(),
+                value: self.cur_token.literal.to_owned(),
+            })
+        }
+
+        if !self.expect_peek(TokenType::RPAREN) {
+            return None;
+        }
+
+        Some(identifiers)
+    }
+
+    pub(crate) fn parse_call_argument(&mut self) -> Vec<Box<dyn Expression>> {
+        let mut args = vec![];
+
+        if self.peek_token_is(&TokenType::RPAREN) {
+            self.next_token();
+            return args;
+        }
+
+        self.next_token();
+        args.push(self.parse_expression(LOWEST).unwrap());
+
+        while self.peek_token_is(&TokenType::COMMA) {
+            self.next_token();
+            self.next_token();
+            args.push(self.parse_expression(LOWEST).unwrap());
+        }
+
+        if !self.expect_peek(TokenType::RPAREN) {
+            return vec![];
+        }
+
+        args
+    }
 }
 
 // util functions
@@ -171,6 +224,7 @@ impl Parser {
         self.precedences.insert(TokenType::MINUS, SUM);
         self.precedences.insert(TokenType::SLASH, PRODUCT);
         self.precedences.insert(TokenType::ASTERISK, PRODUCT);
+        self.precedences.insert(TokenType::LPAREN, CALL);
     }
 
     fn peek_precedence(&self) -> i32 {
