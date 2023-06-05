@@ -12,21 +12,21 @@ pub fn start() {
     loop {
         println!("{}", PROMPT);
         io::stdin().read_line(&mut input).unwrap();
-        let mut l = Lexer::new(input.trim().to_string());
+        let l = Lexer::new(input.trim().to_string());
+        input = String::new();
         let mut p = Parser::new(l);
         let program = p.parse_program().unwrap();
         if p.errors().len() != 0 {
             print_parse_errors(p.errors());
             continue;
         }
-
         println!("{}", program.string());
-
-        input = String::new();
     }
 }
 
 fn print_parse_errors(errors: &Vec<String>) {
+    println!("Woops! We ran into some issue here!");
+    println!(" parser errors:");
     for err in errors {
         println!("\t{}", err)
     }
