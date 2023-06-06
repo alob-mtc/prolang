@@ -2,7 +2,7 @@
 
 > interpreted language
 
-experimental prototyping langage
+experimental prototyping language
 
 It supports mathematical expressions, variable bindings, functions, conditionals, return statements and even advanced concepts like higher-order functions and closures.
 
