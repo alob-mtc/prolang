@@ -123,7 +123,7 @@ let map = fn(arr, f) {
 };
 
 let a = [1, 2, 3, 4];
-let double = fn(x) { x \* 2 };
+let double = fn(x) { x * 2 };
 map(a, double); //[2, 4, 6, 8]
 
 // create reduce function with built in function
