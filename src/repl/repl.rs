@@ -1,4 +1,4 @@
-use std::io;
+use std::io::{self, Write};
 
 use crate::{
     lexer::lexer::Lexer,
@@ -10,7 +10,8 @@ const PROMPT: &str = ">> ";
 pub fn start() {
     let mut input = String::new();
     loop {
-        println!("{}", PROMPT);
+        print!("{}", PROMPT);
+        io::stdout().flush().unwrap();
         io::stdin().read_line(&mut input).unwrap();
         let l = Lexer::new(input.trim().to_string());
         input = String::new();

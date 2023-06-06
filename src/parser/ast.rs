@@ -282,7 +282,7 @@ impl Node for IfExpression {
         out.push(' ');
         out.push_str(&self.consequence.as_ref().unwrap().string());
         if let Some(alt) = &self.alternative {
-            out.push_str("else ");
+            out.push_str(" else ");
             out.push_str(&alt.string())
         }
 
