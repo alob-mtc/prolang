@@ -98,7 +98,7 @@ println("list of even number:", even)
 ##### Recursion
 
 ```rs
-fn fib(n) {
+let fib = fn(n) {
     if n <= 1 {
         return n;
     };
