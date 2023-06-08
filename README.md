@@ -18,6 +18,18 @@ And then there are the different data types:
 
 > syntax and language grammar would change and evolve
 
+Run examples
+
+```sh
+$ cargo run example/main.pr
+```
+
+Run repl (interactive mode)
+
+```sh
+$ cargo run
+```
+
 ##### Expressions
 
 ```rs
