@@ -1,5 +1,5 @@
 [package]
-name = "protolang"
+name = "prolang"
 version = "0.1.0"
 edition = "2021"
 
