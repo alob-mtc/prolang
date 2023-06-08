@@ -12,6 +12,9 @@ pub trait Statement: Node {
     fn get_expression_stmt(&self) -> Option<&ExpressionStatement> {
         None
     }
+    fn get_for_exp(&self) -> Option<&ForLoopExpression> {
+        None
+    }
 }
 
 pub trait Expression: Node {
@@ -37,6 +40,15 @@ pub trait Expression: Node {
         None
     }
     fn get_call_exp(&self) -> Option<&CallExpression> {
+        None
+    }
+    fn get_conditional_iter(&self) -> Option<&ConditionalIteratorExpression> {
+        None
+    }
+}
+
+pub trait Iterator: Node {
+    fn get_iter_literal(&self) -> Option<&IteratorLiteral> {
         None
     }
 }
@@ -138,7 +150,7 @@ impl Statement for ExpressionStatement {
 }
 
 pub struct ReturnStatemnt {
-    pub token: Token,
+    pub token: Token, //return
     pub return_value: Option<Box<dyn Expression>>,
 }
 
@@ -264,7 +276,7 @@ impl Node for InfixExpression {
 }
 
 pub struct IfExpression {
-    pub token: Token,
+    pub token: Token, //IF
     pub condition: Option<Box<dyn Expression>>,
     pub consequence: Option<BlockStatement>,
     pub alternative: Option<BlockStatement>,
@@ -277,7 +289,7 @@ impl Node for IfExpression {
 
     fn string(&self) -> String {
         let mut out = String::new();
-        out.push_str("if");
+        out.push_str(self.token_literal());
         out.push_str(&self.condition.as_ref().unwrap().string());
         out.push(' ');
         out.push_str(&self.consequence.as_ref().unwrap().string());
@@ -297,7 +309,7 @@ impl Expression for IfExpression {
 }
 
 pub struct BlockStatement {
-    pub token: Token,
+    pub token: Token, //{
     pub statements: Vec<Box<dyn Statement>>,
 }
 
@@ -318,7 +330,7 @@ impl Node for BlockStatement {
 }
 
 pub struct FunctionLiteral {
-    pub token: Token,
+    pub token: Token, //FN
     pub parameters: Vec<Identifier>,
     pub body: Option<BlockStatement>,
 }
@@ -354,7 +366,7 @@ impl Expression for FunctionLiteral {
 }
 
 pub struct CallExpression {
-    pub token: Token,
+    pub token: Token, //IDENT
     pub function: Box<dyn Expression>,
     pub arguments: Vec<Box<dyn Expression>>,
 }
@@ -384,6 +396,75 @@ impl Expression for CallExpression {
         Some(self)
     }
 }
+
+pub struct ForLoopExpression {
+    pub token: Token, //FOR
+    pub condition: Option<ForLoopCondition>,
+    pub body: Option<BlockStatement>,
+}
+
+pub enum ForLoopCondition {
+    Loop,
+    ForIn(Box<dyn Expression>),
+    For(Box<dyn Expression>),
+}
+
+impl Node for ForLoopExpression {
+    fn token_literal(&self) -> &str {
+        &self.token.literal
+    }
+
+    fn string(&self) -> String {
+        let out = String::new();
+
+        out
+    }
+}
+
+impl Statement for ForLoopExpression {
+    fn get_for_exp(&self) -> Option<&ForLoopExpression> {
+        Some(self)
+    }
+}
+
+pub struct ConditionalIteratorExpression {
+    pub token: Token, // IN
+    pub variable: Identifier,
+    pub r#in: Option<Box<dyn Iterator>>,
+}
+
+impl Node for ConditionalIteratorExpression {
+    fn token_literal(&self) -> &str {
+        todo!()
+    }
+
+    fn string(&self) -> String {
+        todo!()
+    }
+}
+
+impl Expression for ConditionalIteratorExpression {
+    fn get_conditional_iter(&self) -> Option<&ConditionalIteratorExpression> {
+        Some(self)
+    }
+}
+
+pub struct IteratorLiteral {
+    pub start: Option<IntegerLiteral>,
+    pub end: Option<IntegerLiteral>,
+}
+
+impl Node for IteratorLiteral {
+    fn token_literal(&self) -> &str {
+        todo!()
+    }
+
+    fn string(&self) -> String {
+        todo!()
+    }
+}
+
+impl Iterator for IteratorLiteral {}
 
 #[cfg(test)]
 mod test {

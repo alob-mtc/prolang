@@ -51,7 +51,7 @@ fn parse_call_epression(p: &mut Parser, function: Box<dyn Expression>) -> Box<dy
 
 pub(crate) fn parse_prefix_func(p: &mut Parser) -> Option<Box<dyn Expression>> {
     match p.cur_token.token_type {
-        TokenType::IDENT => Some(parse_identifier(p)),
+        TokenType::IDENT => parse_identifier(p),
         TokenType::INT => Some(parse_integer_literal(p)),
         TokenType::BANG => parse_prefix_expression(p),
         TokenType::MINUS => parse_prefix_expression(p),
@@ -78,11 +78,18 @@ fn parse_prefix_expression(p: &mut Parser) -> Option<Box<dyn Expression>> {
     None
 }
 
-fn parse_identifier(p: &Parser) -> Box<dyn Expression> {
-    Box::new(Identifier {
+fn parse_identifier(p: &mut Parser) -> Option<Box<dyn Expression>> {
+    let expression = Identifier {
         token: p.cur_token.clone(),
         value: p.cur_token.literal.clone(),
-    })
+    };
+
+    if p.peek_token_is(&TokenType::IN) {
+        p.next_token();
+        return p.parse_conditional_iter_expression(expression);
+    }
+
+    Some(Box::new(expression))
 }
 
 fn parse_integer_literal(p: &Parser) -> Box<dyn Expression> {

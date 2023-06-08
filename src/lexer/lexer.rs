@@ -71,6 +71,17 @@ impl Lexer {
             ')' => tok = Token::new(TokenType::RPAREN, self.ch.to_string()),
             '{' => tok = Token::new(TokenType::LBRACE, self.ch.to_string()),
             '}' => tok = Token::new(TokenType::RBRACE, self.ch.to_string()),
+            '.' => {
+                if self.peek_char() == '.' {
+                    let ch = self.ch;
+                    self.read_char();
+                    let mut literal = String::from(ch);
+                    literal.push(ch);
+                    tok = Token::new(TokenType::Spreed, literal)
+                } else {
+                    tok = Token::new(TokenType::Dot, self.ch.to_string())
+                }
+            }
             '\0' => tok.token_type = TokenType::EOF,
             _ => {
                 if is_letter(self.ch) {

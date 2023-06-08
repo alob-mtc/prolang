@@ -282,6 +282,104 @@ fn test_if_expression() {
 }
 
 #[test]
+fn test_for_expression_type_loop_parsing() {
+    let input = String::from("for { x + y; }");
+
+    let l = Lexer::new(input);
+    let mut p = Parser::new(l);
+    let program = p.parse_program().expect("parse_program() return some");
+
+    assert_eq!(chack_parser_errors(&p), false);
+    assert_eq!(
+        program.statements.len(),
+        1,
+        "program.statements does not contain 1 statements. got={}",
+        program.statements.len()
+    );
+
+    let stmt = program
+        .statements
+        .get(0)
+        .expect("expected statemnt[0] to have a value")
+        .get_for_exp()
+        .expect("program.Statements[0] is ast.ExpressionStatement");
+
+    match &stmt.condition {
+        Some(condition) => match condition {
+            crate::parser::ast::ForLoopCondition::Loop => (),
+            _ => panic!(),
+        },
+        None => panic!(),
+    }
+
+    match stmt
+        .body
+        .as_ref()
+        .unwrap()
+        .statements
+        .get(0)
+        .unwrap()
+        .get_expression_stmt()
+    {
+        Some(body_stmt) => match &body_stmt.expression {
+            Some(exp) => test_infix_expression(exp, &"x", "+", &"y"),
+            _ => panic!("for-loop body stmt is not ast.ExpressionStatement"),
+        },
+        _ => panic!("for-loop body stmt is not ast.ExpressionStatement"),
+    }
+}
+
+#[test]
+fn test_for_expression_type_for_parsing() {
+    let input = String::from("for (x < y) { x + y; }");
+
+    let l = Lexer::new(input);
+    let mut p = Parser::new(l);
+    let program = p.parse_program().expect("parse_program() return some");
+
+    assert_eq!(chack_parser_errors(&p), false);
+    assert_eq!(
+        program.statements.len(),
+        1,
+        "program.statements does not contain 1 statements. got={}",
+        program.statements.len()
+    );
+
+    let stmt = program
+        .statements
+        .get(0)
+        .expect("expected statemnt[0] to have a value")
+        .get_for_exp()
+        .expect("program.Statements[0] is ast.ExpressionStatement");
+
+    match &stmt.condition {
+        Some(condition) => match condition {
+            crate::parser::ast::ForLoopCondition::For(condition) => {
+                test_infix_expression(condition, &"x", "<", &"y")
+            }
+            _ => panic!(),
+        },
+        None => panic!(),
+    }
+
+    match stmt
+        .body
+        .as_ref()
+        .unwrap()
+        .statements
+        .get(0)
+        .unwrap()
+        .get_expression_stmt()
+    {
+        Some(body_stmt) => match &body_stmt.expression {
+            Some(exp) => test_infix_expression(exp, &"x", "+", &"y"),
+            _ => panic!("for-loop body stmt is not ast.ExpressionStatement"),
+        },
+        _ => panic!("for-loop body stmt is not ast.ExpressionStatement"),
+    }
+}
+
+#[test]
 fn test_function_literal_parsing() {
     let input = String::from("fn(x, y) { x + y; }");
 

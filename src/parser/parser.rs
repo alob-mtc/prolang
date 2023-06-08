@@ -1,11 +1,13 @@
 use std::collections::HashMap;
+use std::io::SeekFrom;
 
 use crate::lexer::lexer::Lexer;
 use crate::lexer::token::{Token, TokenType};
 
 use super::ast::{
-    BlockStatement, Expression, ExpressionStatement, Identifier, LetStatement, Program,
-    ReturnStatemnt, Statement,
+    BlockStatement, ConditionalIteratorExpression, Expression, ExpressionStatement,
+    ForLoopCondition, ForLoopExpression, Identifier, LetStatement, Program, ReturnStatemnt,
+    Statement,
 };
 use super::parse_func::{parse_infix_func, parse_prefix_func};
 
@@ -58,6 +60,7 @@ impl Parser {
         match self.cur_token.token_type {
             TokenType::LET => self.parse_let_statement(),
             TokenType::RETURN => self.parse_return_statement(),
+            TokenType::FOR => self.parse_for_expression(),
             TokenType::None => None,
             _ => self.parse_expression_statment(),
         }
@@ -213,6 +216,54 @@ impl Parser {
         }
 
         args
+    }
+
+    fn parse_for_expression(&mut self) -> Option<Box<dyn Statement>> {
+        let mut expression = ForLoopExpression {
+            token: self.cur_token.clone(),
+            condition: None,
+            body: None,
+        };
+
+        if !self.peek_token_is(&TokenType::LBRACE) && !self.expect_peek(TokenType::LPAREN) {
+            return None;
+        }
+
+        if self.peek_token_is(&TokenType::LBRACE) {
+            self.next_token();
+            expression.condition = Some(ForLoopCondition::Loop);
+        } else if let Some(condition) = self.parse_expression(LOWEST) {
+            if condition.get_infix_exp().is_some() {
+                expression.condition = Some(ForLoopCondition::For(condition));
+            } else if condition.get_conditional_iter().is_some() {
+                expression.condition = Some(ForLoopCondition::ForIn(condition))
+            }
+
+            if !self.expect_peek(TokenType::LBRACE) {
+                return None;
+            }
+        }
+
+        expression.body = self.parse_block_statement();
+
+        Some(Box::new(expression))
+    }
+
+    pub(crate) fn parse_conditional_iter_expression(
+        &mut self,
+        variable: Identifier,
+    ) -> Option<Box<dyn Expression>> {
+        let mut expression = ConditionalIteratorExpression {
+            token: self.cur_token.clone(),
+            r#in: None,
+            variable,
+        };
+        self.next_token();
+        while !self.peek_token_is(&TokenType::RPAREN) {
+            // TODO:
+            self.next_token();
+        }
+        Some(Box::new(expression))
     }
 }
 

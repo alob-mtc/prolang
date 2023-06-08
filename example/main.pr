@@ -4,3 +4,12 @@ let add = fn(x, y) {
     return x + y;
 };
 let result = add(one, two);
+
+for (x < 10) {
+}
+
+for {
+}
+
+for (i in 0..10) {
+}

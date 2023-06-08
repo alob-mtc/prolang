@@ -17,6 +17,9 @@ pub enum TokenType {
     SLASH,
     EQ,
     NotEq,
+    Spreed,
+
+    Dot,
 
     LT,
     GT,
@@ -37,6 +40,8 @@ pub enum TokenType {
     IF,
     ELSE,
     RETURN,
+    FOR,
+    IN,
 }
 
 #[derive(Default, Debug, Clone)]
@@ -54,6 +59,8 @@ pub fn lookup_ident(ident: &str) -> TokenType {
         "if" => TokenType::IF,
         "else" => TokenType::ELSE,
         "return" => TokenType::RETURN,
+        "for" => TokenType::FOR,
+        "in" => TokenType::IN,
         _ => TokenType::IDENT,
     }
 }

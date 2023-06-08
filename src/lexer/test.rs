@@ -18,6 +18,8 @@ fn test_next_token() {
             return false;
         }
         10 == 10; 10 != 9;
+        .;
+        ..
         "
     .to_string();
     struct TestCase {
@@ -317,6 +319,18 @@ fn test_next_token() {
         TestCase {
             expected_type: TokenType::SEMICOLON,
             expecred_literal: ";".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::Dot,
+            expecred_literal: ".".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::SEMICOLON,
+            expecred_literal: ";".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::Spreed,
+            expecred_literal: "..".to_string(),
         },
         TestCase {
             expected_type: TokenType::EOF,
