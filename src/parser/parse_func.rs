@@ -3,7 +3,7 @@ use crate::lexer::token::TokenType;
 use super::{
     ast::{
         BooleanLiteral, CallExpression, Expression, FunctionLiteral, Identifier, IfExpression,
-        InfixExpression, IntegerLiteral, PrefixExpression,
+        InfixExpression, IntegerLiteral, IteratorLiteral, PrefixExpression,
     },
     parser::{Parser, LOWEST, PREFIX},
 };
@@ -22,6 +22,7 @@ pub(crate) fn parse_infix_func(
         | TokenType::LT
         | TokenType::GT => Some(parse_infix_expression(p, left)),
         TokenType::LPAREN => Some(parse_call_epression(p, left)),
+        TokenType::Spreed => Some(parse_spreed_epression(p, left)),
         _ => None,
     }
 }
@@ -47,6 +48,20 @@ fn parse_call_epression(p: &mut Parser, function: Box<dyn Expression>) -> Box<dy
     };
 
     Box::new(exp)
+}
+
+fn parse_spreed_epression(p: &mut Parser, int: Box<dyn Expression>) -> Box<dyn Expression> {
+    let mut expression = Box::new(IteratorLiteral {
+        token: p.cur_token.clone(),
+        start: int,
+        end: None,
+    });
+
+    let precedence = p.cur_precedence();
+    p.next_token();
+    expression.end = p.parse_expression(precedence);
+
+    expression
 }
 
 pub(crate) fn parse_prefix_func(p: &mut Parser) -> Option<Box<dyn Expression>> {

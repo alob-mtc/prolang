@@ -6,8 +6,8 @@ use crate::lexer::token::{Token, TokenType};
 
 use super::ast::{
     BlockStatement, ConditionalIteratorExpression, Expression, ExpressionStatement,
-    ForLoopCondition, ForLoopExpression, Identifier, LetStatement, Program, ReturnStatemnt,
-    Statement,
+    ForLoopCondition, ForLoopExpression, Identifier, Iterators, LetStatement, Program,
+    ReturnStatemnt, Statement,
 };
 use super::parse_func::{parse_infix_func, parse_prefix_func};
 
@@ -18,6 +18,7 @@ const SUM: i32 = 4; // +
 const PRODUCT: i32 = 5; // *
 pub(crate) const PREFIX: i32 = 6; // -X or !X
 const CALL: i32 = 7; // fn(x)
+const SPRRED: i32 = 8;
 
 pub struct Parser {
     l: Lexer,
@@ -232,15 +233,18 @@ impl Parser {
         if self.peek_token_is(&TokenType::LBRACE) {
             self.next_token();
             expression.condition = Some(ForLoopCondition::Loop);
-        } else if let Some(condition) = self.parse_expression(LOWEST) {
-            if condition.get_infix_exp().is_some() {
-                expression.condition = Some(ForLoopCondition::For(condition));
-            } else if condition.get_conditional_iter().is_some() {
-                expression.condition = Some(ForLoopCondition::ForIn(condition))
-            }
-
-            if !self.expect_peek(TokenType::LBRACE) {
-                return None;
+        } else {
+            self.next_token();
+            if let Some(condition) = self.parse_expression(LOWEST) {
+                if condition.get_infix_exp().is_some() {
+                    expression.condition = Some(ForLoopCondition::For(condition));
+                    self.next_token();
+                } else if condition.get_conditional_iter().is_some() {
+                    expression.condition = Some(ForLoopCondition::ForIn(condition))
+                }
+                if !self.expect_peek(TokenType::LBRACE) {
+                    return None;
+                }
             }
         }
 
@@ -255,14 +259,17 @@ impl Parser {
     ) -> Option<Box<dyn Expression>> {
         let mut expression = ConditionalIteratorExpression {
             token: self.cur_token.clone(),
-            r#in: None,
             variable,
+            r#in: None,
         };
         self.next_token();
-        while !self.peek_token_is(&TokenType::RPAREN) {
-            // TODO:
-            self.next_token();
+
+        expression.r#in = self.parse_expression(LOWEST);
+
+        if !self.expect_peek(TokenType::RPAREN) {
+            return None;
         }
+
         Some(Box::new(expression))
     }
 }
@@ -279,6 +286,7 @@ impl Parser {
         self.precedences.insert(TokenType::SLASH, PRODUCT);
         self.precedences.insert(TokenType::ASTERISK, PRODUCT);
         self.precedences.insert(TokenType::LPAREN, CALL);
+        self.precedences.insert(TokenType::Spreed, SPRRED);
     }
 
     fn peek_precedence(&self) -> i32 {

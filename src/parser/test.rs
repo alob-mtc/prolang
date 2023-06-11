@@ -380,6 +380,78 @@ fn test_for_expression_type_for_parsing() {
 }
 
 #[test]
+fn test_for_expression_type_forin_parsing() {
+    let input = String::from("for (i in 0..10) { x + y; }");
+
+    let l = Lexer::new(input);
+    let mut p = Parser::new(l);
+    let program = p.parse_program().expect("parse_program() return some");
+
+    assert_eq!(chack_parser_errors(&p), false);
+    assert_eq!(
+        program.statements.len(),
+        1,
+        "program.statements does not contain 1 statements. got={}",
+        program.statements.len()
+    );
+
+    let stmt = program
+        .statements
+        .get(0)
+        .expect("expected statemnt[0] to have a value")
+        .get_for_exp()
+        .expect("program.Statements[0] is ast.ExpressionStatement");
+
+    match &stmt.condition {
+        Some(condition) => match condition {
+            crate::parser::ast::ForLoopCondition::ForIn(condition) => {
+                test_conditional_iter_expression(&Box::new(condition.as_ref()));
+            }
+            _ => panic!(),
+        },
+        None => panic!(),
+    }
+
+    match stmt
+        .body
+        .as_ref()
+        .unwrap()
+        .statements
+        .get(0)
+        .unwrap()
+        .get_expression_stmt()
+    {
+        Some(body_stmt) => match &body_stmt.expression {
+            Some(exp) => test_infix_expression(exp, &"x", "+", &"y"),
+            _ => panic!("for-loop body stmt is not ast.ExpressionStatement"),
+        },
+        _ => panic!("for-loop body stmt is not ast.ExpressionStatement"),
+    }
+}
+
+fn test_conditional_iter_expression(condition: &Box<&dyn Expression>) {
+    match condition.get_conditional_iter() {
+        Some(condition) => {
+            test_literal_expression(&Box::new(&condition.variable), &"i");
+            match &condition.r#in {
+                Some(r#in) => match r#in.get_iter_literal() {
+                    Some(iter) => {
+                        test_literal_expression(&Box::new(iter.start.as_ref()), &"0");
+                        test_literal_expression(
+                            &Box::new(iter.end.as_ref().unwrap().as_ref()),
+                            &"10",
+                        )
+                    }
+                    None => panic!("conditional not iteraltor literal"),
+                },
+                None => panic!("condition iter does not have in expression"),
+            }
+        }
+        None => todo!(),
+    }
+}
+
+#[test]
 fn test_function_literal_parsing() {
     let input = String::from("fn(x, y) { x + y; }");
 

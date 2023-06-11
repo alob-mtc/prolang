@@ -45,9 +45,12 @@ pub trait Expression: Node {
     fn get_conditional_iter(&self) -> Option<&ConditionalIteratorExpression> {
         None
     }
+    fn get_iter_literal(&self) -> Option<&IteratorLiteral> {
+        None
+    }
 }
 
-pub trait Iterator: Node {
+pub trait Iterators: Node {
     fn get_iter_literal(&self) -> Option<&IteratorLiteral> {
         None
     }
@@ -430,7 +433,7 @@ impl Statement for ForLoopExpression {
 pub struct ConditionalIteratorExpression {
     pub token: Token, // IN
     pub variable: Identifier,
-    pub r#in: Option<Box<dyn Iterator>>,
+    pub r#in: Option<Box<dyn Expression>>,
 }
 
 impl Node for ConditionalIteratorExpression {
@@ -450,8 +453,9 @@ impl Expression for ConditionalIteratorExpression {
 }
 
 pub struct IteratorLiteral {
-    pub start: Option<IntegerLiteral>,
-    pub end: Option<IntegerLiteral>,
+    pub token: Token,
+    pub start: Box<dyn Expression>,
+    pub end: Option<Box<dyn Expression>>,
 }
 
 impl Node for IteratorLiteral {
@@ -464,7 +468,9 @@ impl Node for IteratorLiteral {
     }
 }
 
-impl Iterator for IteratorLiteral {}
+impl Iterators for IteratorLiteral {}
+
+impl Expression for IteratorLiteral {}
 
 #[cfg(test)]
 mod test {
