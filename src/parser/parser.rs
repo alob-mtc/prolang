@@ -1,24 +1,23 @@
 use std::collections::HashMap;
-use std::io::SeekFrom;
 
 use crate::lexer::lexer::Lexer;
 use crate::lexer::token::{Token, TokenType};
 
 use super::ast::{
-    BlockStatement, ConditionalIteratorExpression, Expression, ExpressionStatement,
-    ForLoopCondition, ForLoopExpression, Identifier, Iterators, LetStatement, Program,
-    ReturnStatemnt, Statement,
+    BlockStatement, Expression, ExpressionStatement, ForLoopCondition, ForLoopExpression,
+    Identifier, LetStatement, Program, ReturnStatemnt, Statement,
 };
 use super::parse_func::{parse_infix_func, parse_prefix_func};
 
 pub(crate) const LOWEST: i32 = 1;
 const EQUALS: i32 = 2; // ==
 const LESSGREATER: i32 = 3; // > or <
-const SUM: i32 = 4; // +
-const PRODUCT: i32 = 5; // *
-pub(crate) const PREFIX: i32 = 6; // -X or !X
-const CALL: i32 = 7; // fn(x)
-const SPRRED: i32 = 8;
+const SPREED: i32 = 4;
+const IN: i32 = 5;
+const SUM: i32 = 6; // +
+const PRODUCT: i32 = 7; // *
+pub(crate) const PREFIX: i32 = 8; // -X or !X
+const CALL: i32 = 9; // fn(x)
 
 pub struct Parser {
     l: Lexer,
@@ -252,26 +251,6 @@ impl Parser {
 
         Some(Box::new(expression))
     }
-
-    pub(crate) fn parse_conditional_iter_expression(
-        &mut self,
-        variable: Identifier,
-    ) -> Option<Box<dyn Expression>> {
-        let mut expression = ConditionalIteratorExpression {
-            token: self.cur_token.clone(),
-            variable,
-            r#in: None,
-        };
-        self.next_token();
-
-        expression.r#in = self.parse_expression(LOWEST);
-
-        if !self.expect_peek(TokenType::RPAREN) {
-            return None;
-        }
-
-        Some(Box::new(expression))
-    }
 }
 
 // util functions
@@ -286,7 +265,8 @@ impl Parser {
         self.precedences.insert(TokenType::SLASH, PRODUCT);
         self.precedences.insert(TokenType::ASTERISK, PRODUCT);
         self.precedences.insert(TokenType::LPAREN, CALL);
-        self.precedences.insert(TokenType::Spreed, SPRRED);
+        self.precedences.insert(TokenType::Spreed, SPREED);
+        self.precedences.insert(TokenType::IN, IN);
     }
 
     fn peek_precedence(&self) -> i32 {

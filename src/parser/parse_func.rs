@@ -1,4 +1,5 @@
 use crate::lexer::token::TokenType;
+use crate::parser::ast::ConditionalIteratorExpression;
 
 use super::{
     ast::{
@@ -22,6 +23,7 @@ pub(crate) fn parse_infix_func(
         | TokenType::LT
         | TokenType::GT => Some(parse_infix_expression(p, left)),
         TokenType::LPAREN => Some(parse_call_epression(p, left)),
+        TokenType::IN => parse_conditional_iter_expression(p, left),
         TokenType::Spreed => Some(parse_spreed_epression(p, left)),
         _ => None,
     }
@@ -48,6 +50,30 @@ fn parse_call_epression(p: &mut Parser, function: Box<dyn Expression>) -> Box<dy
     };
 
     Box::new(exp)
+}
+
+pub fn parse_conditional_iter_expression(
+    p: &mut Parser,
+    variable: Box<dyn Expression>,
+) -> Option<Box<dyn Expression>> {
+    let ident = variable.get_ident()?;
+    let mut expression = ConditionalIteratorExpression {
+        token: p.cur_token.clone(),
+        variable: Identifier {
+            token: ident.token.clone(),
+            value: ident.value.clone(),
+        },
+        r#in: None,
+    };
+    p.next_token();
+
+    expression.r#in = p.parse_expression(LOWEST);
+
+    if !p.expect_peek(TokenType::RPAREN) {
+        return None;
+    }
+
+    Some(Box::new(expression))
 }
 
 fn parse_spreed_epression(p: &mut Parser, int: Box<dyn Expression>) -> Box<dyn Expression> {
@@ -98,11 +124,6 @@ fn parse_identifier(p: &mut Parser) -> Option<Box<dyn Expression>> {
         token: p.cur_token.clone(),
         value: p.cur_token.literal.clone(),
     };
-
-    if p.peek_token_is(&TokenType::IN) {
-        p.next_token();
-        return p.parse_conditional_iter_expression(expression);
-    }
 
     Some(Box::new(expression))
 }
