@@ -479,17 +479,19 @@ mod test {
     use super::{Identifier, LetStatement, Node, Program};
 
     #[test]
-    fn test_string() {
+        fn test_string() {
         let program = Program {
             statements: vec![Box::new(LetStatement {
                 token: Token {
                     token_type: TokenType::LET,
                     literal: "let".to_string(),
+                    position: (0, 0),
                 },
                 name: Identifier {
                     token: Token {
                         token_type: TokenType::IDENT,
                         literal: "myVar".to_string(),
+                        position: (0, 0),
                     },
                     value: "myVar".to_string(),
                 },
@@ -497,6 +499,7 @@ mod test {
                     token: Token {
                         token_type: TokenType::IDENT,
                         literal: "anotherVar".to_string(),
+                        position: (0, 0),
                     },
                     value: "anotherVar".to_string(),
                 })),
