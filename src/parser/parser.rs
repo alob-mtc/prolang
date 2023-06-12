@@ -269,8 +269,8 @@ impl Parser {
     }
     fn peek_error(&mut self, t: TokenType) {
         let msg = format!(
-            "expected next token to be {:?}, got {:?} instead",
-            t, self.peek_token.token_type,
+            "main.pl:{}:{} \n expected next token to be {:?}, got {:?} instead",
+            self.cur_token.position.0, self.cur_token.position.1, t, self.peek_token.token_type,
         );
         self.errors.push(msg)
     }

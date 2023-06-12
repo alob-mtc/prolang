@@ -2,6 +2,7 @@ use super::token::{lookup_ident, Token, TokenType};
 
 pub struct Lexer {
     input: String,
+    line: usize,
     position: usize,
     read_position: usize,
     ch: char,
@@ -11,6 +12,7 @@ impl Lexer {
     pub fn new(input: String) -> Self {
         let mut l = Self {
             input,
+            line: 1,
             position: 0,
             read_position: 0,
             ch: '\0',
@@ -34,6 +36,12 @@ impl Lexer {
     pub fn next_token(&mut self) -> Token {
         let mut tok = Token::default();
 
+        if self.ch == '\n' {
+            self.line += 1;
+        }
+
+        let position = (self.line, self.position);
+
         self.skip_whitespace();
 
         match self.ch {
@@ -43,46 +51,48 @@ impl Lexer {
                     self.read_char();
                     let mut literal = String::from(ch);
                     literal.push(self.ch);
-                    tok = Token::new(TokenType::EQ, literal);
+                    tok = Token::new(TokenType::EQ, literal, position);
                 } else {
-                    tok = Token::new(TokenType::ASSIGN, self.ch.to_string());
+                    tok = Token::new(TokenType::ASSIGN, self.ch.to_string(), position);
                 }
             }
-            '+' => tok = Token::new(TokenType::PLUS, self.ch.to_string()),
-            '-' => tok = Token::new(TokenType::MINUS, self.ch.to_string()),
+            '+' => tok = Token::new(TokenType::PLUS, self.ch.to_string(), position),
+            '-' => tok = Token::new(TokenType::MINUS, self.ch.to_string(), position),
             '!' => {
                 if self.peek_char() == '=' {
                     let ch = self.ch;
                     self.read_char();
                     let mut literal = String::from(ch);
                     literal.push(self.ch);
-                    tok = Token::new(TokenType::NotEq, literal);
+                    tok = Token::new(TokenType::NotEq, literal, position);
                 } else {
-                    tok = Token::new(TokenType::BANG, self.ch.to_string());
+                    tok = Token::new(TokenType::BANG, self.ch.to_string(), position);
                 }
             }
-            '/' => tok = Token::new(TokenType::SLASH, self.ch.to_string()),
-            '*' => tok = Token::new(TokenType::ASTERISK, self.ch.to_string()),
-            '<' => tok = Token::new(TokenType::LT, self.ch.to_string()),
-            '>' => tok = Token::new(TokenType::GT, self.ch.to_string()),
-            ';' => tok = Token::new(TokenType::SEMICOLON, self.ch.to_string()),
-            ',' => tok = Token::new(TokenType::COMMA, self.ch.to_string()),
-            '(' => tok = Token::new(TokenType::LPAREN, self.ch.to_string()),
-            ')' => tok = Token::new(TokenType::RPAREN, self.ch.to_string()),
-            '{' => tok = Token::new(TokenType::LBRACE, self.ch.to_string()),
-            '}' => tok = Token::new(TokenType::RBRACE, self.ch.to_string()),
+            '/' => tok = Token::new(TokenType::SLASH, self.ch.to_string(), position),
+            '*' => tok = Token::new(TokenType::ASTERISK, self.ch.to_string(), position),
+            '<' => tok = Token::new(TokenType::LT, self.ch.to_string(), position),
+            '>' => tok = Token::new(TokenType::GT, self.ch.to_string(), position),
+            ';' => tok = Token::new(TokenType::SEMICOLON, self.ch.to_string(), position),
+            ',' => tok = Token::new(TokenType::COMMA, self.ch.to_string(), position),
+            '(' => tok = Token::new(TokenType::LPAREN, self.ch.to_string(), position),
+            ')' => tok = Token::new(TokenType::RPAREN, self.ch.to_string(), position),
+            '{' => tok = Token::new(TokenType::LBRACE, self.ch.to_string(), position),
+            '}' => tok = Token::new(TokenType::RBRACE, self.ch.to_string(), position),
             '\0' => tok.token_type = TokenType::EOF,
             _ => {
                 if is_letter(self.ch) {
                     tok.literal = self.read_indentifier();
                     tok.token_type = lookup_ident(&tok.literal);
+                    tok.position = position;
                     return tok;
                 } else if is_digit(self.ch) {
                     tok.literal = self.read_number();
                     tok.token_type = TokenType::INT;
+                    tok.position = position;
                     return tok;
                 } else {
-                    tok = Token::new(TokenType::ILLEGAL, self.ch.to_string())
+                    tok = Token::new(TokenType::ILLEGAL, self.ch.to_string(), position)
                 }
             }
         }
