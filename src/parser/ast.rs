@@ -8,17 +8,7 @@ pub trait Node {
     fn get_as_any(&self) -> &dyn Any;
 }
 
-pub trait Statement: Node {
-    fn get_let(&self) -> Option<&LetStatement> {
-        None
-    }
-    fn get_expression_stmt(&self) -> Option<&ExpressionStatement> {
-        None
-    }
-    fn get_for_exp(&self) -> Option<&ForLoopExpression> {
-        None
-    }
-}
+pub trait Statement: Node {}
 
 pub trait Expression: Node {}
 
@@ -102,11 +92,7 @@ pub struct ExpressionStatement {
     pub expression: Option<Box<dyn Expression>>,
 }
 
-impl Statement for ExpressionStatement {
-    fn get_expression_stmt(&self) -> Option<&ExpressionStatement> {
-        Some(self)
-    }
-}
+impl Statement for ExpressionStatement {}
 
 impl Node for ExpressionStatement {
     fn token_literal(&self) -> &str {
