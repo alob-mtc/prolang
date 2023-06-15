@@ -381,6 +381,15 @@ pub enum ForLoopCondition {
     For(Box<dyn Expression>),
 }
 
+impl ForLoopCondition {
+    fn string(&self) -> String {
+        match self {
+            ForLoopCondition::Loop => "".to_owned(),
+            ForLoopCondition::ForIn(exp) | ForLoopCondition::For(exp) => exp.string(),
+        }
+    }
+}
+
 impl Statement for ForLoopExpression {}
 
 impl Node for ForLoopExpression {
@@ -389,7 +398,15 @@ impl Node for ForLoopExpression {
     }
 
     fn string(&self) -> String {
-        let out = String::new();
+        let mut out: String = String::new();
+        out.push_str(self.token_literal());
+        out.push(' ');
+        if let Some(cond) = &self.condition {
+            out.push_str(&cond.string())
+        }
+        if let Some(body) = &self.body {
+            out.push_str(&body.string());
+        }
 
         out
     }
@@ -408,11 +425,22 @@ impl Expression for ConditionalIteratorExpression {}
 
 impl Node for ConditionalIteratorExpression {
     fn token_literal(&self) -> &str {
-        todo!()
+        &self.token.literal
     }
 
     fn string(&self) -> String {
-        todo!()
+        let mut out = String::new();
+        out.push('(');
+        out.push_str(&self.variable.string());
+        out.push(' ');
+        out.push_str(self.token_literal());
+        out.push(' ');
+        if let Some(r#in) = &self.r#in {
+            out.push_str(&r#in.string())
+        }
+        out.push(')');
+
+        out
     }
     fn get_as_any(&self) -> &dyn Any {
         self
@@ -420,7 +448,7 @@ impl Node for ConditionalIteratorExpression {
 }
 
 pub struct IteratorLiteral {
-    pub token: Token,
+    pub token: Token, // .. SPREED
     pub start: Box<dyn Expression>,
     pub end: Option<Box<dyn Expression>>,
 }
@@ -431,11 +459,16 @@ impl Expression for IteratorLiteral {}
 
 impl Node for IteratorLiteral {
     fn token_literal(&self) -> &str {
-        todo!()
+        &self.token.literal
     }
 
     fn string(&self) -> String {
-        todo!()
+        let mut out = String::new();
+        out.push_str(&self.start.string());
+        out.push_str(self.token_literal());
+        out.push_str(&self.end.as_ref().unwrap().string());
+
+        out
     }
     fn get_as_any(&self) -> &dyn Any {
         self

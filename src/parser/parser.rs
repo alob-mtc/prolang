@@ -251,6 +251,10 @@ impl Parser {
 
         expression.body = self.parse_block_statement();
 
+        if self.peek_token_is(&TokenType::SEMICOLON) {
+            self.next_token();
+        }
+
         Some(Box::new(expression))
     }
 }
