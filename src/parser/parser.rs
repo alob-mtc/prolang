@@ -4,18 +4,22 @@ use crate::lexer::lexer::Lexer;
 use crate::lexer::token::{Token, TokenType};
 
 use super::ast::{
-    BlockStatement, Expression, ExpressionStatement, Identifier, LetStatement, Program,
+    BlockStatement, ConditionalIteratorExpression, Expression, ExpressionStatement,
+    ForLoopCondition, ForLoopExpression, Identifier, InfixExpression, LetStatement, Program,
     ReturnStatemnt, Statement,
 };
+use super::is_of_type;
 use super::parse_func::{parse_infix_func, parse_prefix_func};
 
 pub(crate) const LOWEST: i32 = 1;
 const EQUALS: i32 = 2; // ==
 const LESSGREATER: i32 = 3; // > or <
-const SUM: i32 = 4; // +
-const PRODUCT: i32 = 5; // *
-pub(crate) const PREFIX: i32 = 6; // -X or !X
-const CALL: i32 = 7; // fn(x)
+const SPREED: i32 = 4;
+const IN: i32 = 5;
+const SUM: i32 = 6; // +
+const PRODUCT: i32 = 7; // *
+pub(crate) const PREFIX: i32 = 8; // -X or !X
+const CALL: i32 = 9; // fn(x)
 
 pub struct Parser {
     l: Lexer,
@@ -58,6 +62,7 @@ impl Parser {
         match self.cur_token.token_type {
             TokenType::LET => self.parse_let_statement(),
             TokenType::RETURN => self.parse_return_statement(),
+            TokenType::FOR => self.parse_for_expression(),
             TokenType::None => None,
             _ => self.parse_expression_statment(),
         }
@@ -214,6 +219,44 @@ impl Parser {
 
         args
     }
+
+    fn parse_for_expression(&mut self) -> Option<Box<dyn Statement>> {
+        let mut expression = ForLoopExpression {
+            token: self.cur_token.clone(),
+            condition: None,
+            body: None,
+        };
+
+        if !self.peek_token_is(&TokenType::LBRACE) && !self.expect_peek(TokenType::LPAREN) {
+            return None;
+        }
+
+        if self.peek_token_is(&TokenType::LBRACE) {
+            self.next_token();
+            expression.condition = Some(ForLoopCondition::Loop);
+        } else {
+            self.next_token();
+            if let Some(condition) = self.parse_expression(LOWEST) {
+                if is_of_type::<InfixExpression>(condition.get_as_any()) {
+                    expression.condition = Some(ForLoopCondition::For(condition));
+                    self.next_token();
+                } else if is_of_type::<ConditionalIteratorExpression>(condition.get_as_any()) {
+                    expression.condition = Some(ForLoopCondition::ForIn(condition))
+                }
+                if !self.expect_peek(TokenType::LBRACE) {
+                    return None;
+                }
+            }
+        }
+
+        expression.body = self.parse_block_statement();
+
+        if self.peek_token_is(&TokenType::SEMICOLON) {
+            self.next_token();
+        }
+
+        Some(Box::new(expression))
+    }
 }
 
 // util functions
@@ -228,6 +271,8 @@ impl Parser {
         self.precedences.insert(TokenType::SLASH, PRODUCT);
         self.precedences.insert(TokenType::ASTERISK, PRODUCT);
         self.precedences.insert(TokenType::LPAREN, CALL);
+        self.precedences.insert(TokenType::Spreed, SPREED);
+        self.precedences.insert(TokenType::IN, IN);
     }
 
     fn peek_precedence(&self) -> i32 {
@@ -269,7 +314,7 @@ impl Parser {
     }
     fn peek_error(&mut self, t: TokenType) {
         let msg = format!(
-            "main.pl:{}:{} \n expected next token to be {:?}, got {:?} instead",
+            "main.pr:{}:{} \n expected next token to be {:?}, got {:?} instead",
             self.cur_token.position.0, self.cur_token.position.1, t, self.peek_token.token_type,
         );
         self.errors.push(msg)

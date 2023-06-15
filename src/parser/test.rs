@@ -2,9 +2,18 @@ use std::any::Any;
 
 use crate::{
     lexer::lexer::Lexer,
-    parser::ast::{Expression, Node, Statement},
-    parser::parser::Parser,
+    parser::{ast::ExpressionStatement, parser::Parser},
+    parser::{
+        ast::{
+            BooleanLiteral, CallExpression, Expression, ForLoopExpression, FunctionLiteral,
+            Identifier, IfExpression, InfixExpression, IntegerLiteral, LetStatement, Node,
+            PrefixExpression, Statement,
+        },
+        get_of_type,
+    },
 };
+
+use super::ast::{ConditionalIteratorExpression, IteratorLiteral};
 
 #[test]
 fn test_let_statement() {
@@ -88,7 +97,7 @@ fn test_let_statements() {
 
         let stmt = program.statements.get(0).unwrap();
         let_statemnt(stmt, &tt.expected_identifier);
-        let let_exp = stmt.get_let().unwrap();
+        let let_exp = get_of_type::<LetStatement>(stmt.get_as_any()).unwrap();
 
         test_literal_expression(
             &Box::new(let_exp.value.as_ref().unwrap().as_ref()),
@@ -145,15 +154,18 @@ fn test_identifier_expression() {
         program.statements.len()
     );
 
-    let stmt = program
-        .statements
-        .get(0)
-        .expect("expected statemnt[0] to have a value")
-        .get_expression_stmt()
-        .expect("program.Statements[0] is ast.ExpressionStatement");
+    let stmt = get_of_type::<ExpressionStatement>(
+        program
+            .statements
+            .leak()
+            .get(0)
+            .expect("expected statemnt[0] to have a value")
+            .get_as_any(),
+    )
+    .expect("program.Statements[0] is ast.ExpressionStatement");
 
     let ident = match &stmt.expression {
-        Some(ident) => match ident.get_ident() {
+        Some(ident) => match get_of_type::<Identifier>(ident.get_as_any()) {
             Some(ident) => ident,
             _ => panic!("exp is not Identifier"),
         },
@@ -191,15 +203,18 @@ fn test_integer_literal_expression() {
         program.statements.len()
     );
 
-    let stmt = program
-        .statements
-        .get(0)
-        .expect("expected statemnt[0] to have a value")
-        .get_expression_stmt()
-        .expect("program.Statements[0] is ast.ExpressionStatement");
+    let stmt = get_of_type::<ExpressionStatement>(
+        program
+            .statements
+            .leak()
+            .get(0)
+            .expect("expected statemnt[0] to have a value")
+            .get_as_any(),
+    )
+    .expect("program.Statements[0] is ast.ExpressionStatement");
 
     let ident = match &stmt.expression {
-        Some(ident) => match ident.get_int_literal() {
+        Some(ident) => match get_of_type::<IntegerLiteral>(ident.get_as_any()) {
             Some(ident) => ident,
             _ => panic!("exp is not Identifier"),
         },
@@ -237,15 +252,18 @@ fn test_if_expression() {
         program.statements.len()
     );
 
-    let stmt = program
-        .statements
-        .get(0)
-        .expect("expected statemnt[0] to have a value")
-        .get_expression_stmt()
-        .expect("program.Statements[0] is ast.ExpressionStatement");
+    let stmt = get_of_type::<ExpressionStatement>(
+        program
+            .statements
+            .leak()
+            .get(0)
+            .expect("expected statemnt[0] to have a value")
+            .get_as_any(),
+    )
+    .expect("program.Statements[0] is ast.ExpressionStatement");
 
     let ifexp = match &stmt.expression {
-        Some(ifexp) => match ifexp.get_if_exp() {
+        Some(ifexp) => match get_of_type::<IfExpression>(ifexp.get_as_any()) {
             Some(ifexp) => ifexp,
             _ => panic!("exp is not If expression"),
         },
@@ -260,15 +278,17 @@ fn test_if_expression() {
         ifexp.consequence.as_ref().unwrap().statements.len()
     );
 
-    let consequence = ifexp
-        .consequence
-        .as_ref()
-        .unwrap()
-        .statements
-        .get(0)
-        .expect("expected statemnt[0] to have a value")
-        .get_expression_stmt()
-        .expect("statements[0] is ast.ExpressionStatement");
+    let consequence = get_of_type::<ExpressionStatement>(
+        ifexp
+            .consequence
+            .as_ref()
+            .unwrap()
+            .statements
+            .get(0)
+            .expect("expected statemnt[0] to have a value")
+            .get_as_any(),
+    )
+    .expect("statements[0] is ast.ExpressionStatement");
 
     test_identifier(
         &Box::new(consequence.expression.as_ref().unwrap().as_ref()),
@@ -279,6 +299,185 @@ fn test_if_expression() {
         true,
         "alternative was not some.",
     )
+}
+
+#[test]
+fn test_for_expression_type_loop_parsing() {
+    let input = String::from("for { x + y; }");
+
+    let l = Lexer::new(input);
+    let mut p = Parser::new(l);
+    let program = p.parse_program().expect("parse_program() return some");
+
+    assert_eq!(chack_parser_errors(&p), false);
+    assert_eq!(
+        program.statements.len(),
+        1,
+        "program.statements does not contain 1 statements. got={}",
+        program.statements.len()
+    );
+
+    let stmt = get_of_type::<ForLoopExpression>(
+        program
+            .statements
+            .leak()
+            .get(0)
+            .expect("expected statemnt[0] to have a value")
+            .get_as_any(),
+    )
+    .expect("program.Statements[0] is ast.ForLoopExpression");
+
+    match &stmt.condition {
+        Some(condition) => match condition {
+            crate::parser::ast::ForLoopCondition::Loop => (),
+            _ => panic!(),
+        },
+        None => panic!(),
+    }
+
+    match get_of_type::<ExpressionStatement>(
+        stmt.body
+            .as_ref()
+            .unwrap()
+            .statements
+            .get(0)
+            .unwrap()
+            .get_as_any(),
+    ) {
+        Some(body_stmt) => match &body_stmt.expression {
+            Some(exp) => test_infix_expression(exp, &"x", "+", &"y"),
+            _ => panic!("for-loop body stmt is not ast.ExpressionStatement"),
+        },
+        _ => panic!("for-loop body stmt is not ast.ExpressionStatement"),
+    }
+}
+
+#[test]
+fn test_for_expression_type_for_parsing() {
+    let input = String::from("for (x < y) { x + y; }");
+
+    let l = Lexer::new(input);
+    let mut p = Parser::new(l);
+    let program = p.parse_program().expect("parse_program() return some");
+
+    assert_eq!(chack_parser_errors(&p), false);
+    assert_eq!(
+        program.statements.len(),
+        1,
+        "program.statements does not contain 1 statements. got={}",
+        program.statements.len()
+    );
+
+    let stmt = get_of_type::<ForLoopExpression>(
+        program
+            .statements
+            .leak()
+            .get(0)
+            .expect("expected statemnt[0] to have a value")
+            .get_as_any(),
+    )
+    .expect("program.Statements[0] is ast.ForLoopExpression");
+
+    match &stmt.condition {
+        Some(condition) => match condition {
+            crate::parser::ast::ForLoopCondition::For(condition) => {
+                test_infix_expression(condition, &"x", "<", &"y")
+            }
+            _ => panic!(),
+        },
+        None => panic!(),
+    }
+
+    match get_of_type::<ExpressionStatement>(
+        stmt.body
+            .as_ref()
+            .unwrap()
+            .statements
+            .get(0)
+            .unwrap()
+            .get_as_any(),
+    ) {
+        Some(body_stmt) => match &body_stmt.expression {
+            Some(exp) => test_infix_expression(exp, &"x", "+", &"y"),
+            _ => panic!("for-loop body stmt is not ast.ExpressionStatement"),
+        },
+        _ => panic!("for-loop body stmt is not ast.ExpressionStatement"),
+    }
+}
+
+#[test]
+fn test_for_expression_type_forin_parsing() {
+    let input = String::from("for (i in 0..10) { x + y; }");
+
+    let l = Lexer::new(input);
+    let mut p = Parser::new(l);
+    let program = p.parse_program().expect("parse_program() return some");
+
+    assert_eq!(chack_parser_errors(&p), false);
+    assert_eq!(
+        program.statements.len(),
+        1,
+        "program.statements does not contain 1 statements. got={}",
+        program.statements.len()
+    );
+
+    let stmt = get_of_type::<ForLoopExpression>(
+        program
+            .statements
+            .leak()
+            .get(0)
+            .expect("expected statemnt[0] to have a value")
+            .get_as_any(),
+    )
+    .expect("program.Statements[0] is ast.ForLoopExpression");
+
+    match &stmt.condition {
+        Some(condition) => match condition {
+            crate::parser::ast::ForLoopCondition::ForIn(condition) => {
+                test_conditional_iter_expression(&Box::new(condition.as_ref()));
+            }
+            _ => panic!(),
+        },
+        None => panic!(),
+    }
+
+    match get_of_type::<ExpressionStatement>(
+        stmt.body
+            .as_ref()
+            .unwrap()
+            .statements
+            .get(0)
+            .unwrap()
+            .get_as_any(),
+    ) {
+        Some(body_stmt) => match &body_stmt.expression {
+            Some(exp) => test_infix_expression(exp, &"x", "+", &"y"),
+            _ => panic!("for-loop body stmt is not ast.ExpressionStatement"),
+        },
+        _ => panic!("for-loop body stmt is not ast.ExpressionStatement"),
+    }
+}
+
+fn test_conditional_iter_expression(condition: &Box<&dyn Expression>) {
+    match get_of_type::<ConditionalIteratorExpression>(condition.get_as_any()) {
+        Some(condition) => {
+            test_literal_expression(&Box::new(&condition.variable), &"i");
+            match &condition.r#in {
+                Some(r#in) => match get_of_type::<IteratorLiteral>(r#in.get_as_any()) {
+                    Some(iter) => {
+                        test_literal_expression(&Box::new(iter.start.as_ref()), &"0");
+                        test_literal_expression(
+                            &Box::new(iter.end.as_ref().unwrap().as_ref()),
+                            &"10",
+                        )
+                    }
+                    None => panic!("conditional not iteraltor literal"),
+                },
+                None => panic!("condition iter does not have in expression"),
+            }
+        }
+        None => todo!(),
+    }
 }
 
 #[test]
@@ -297,15 +496,18 @@ fn test_function_literal_parsing() {
         program.statements.len()
     );
 
-    let stmt = program
-        .statements
-        .get(0)
-        .expect("expected statemnt[0] to have a value")
-        .get_expression_stmt()
-        .expect("program.Statements[0] is ast.ExpressionStatement");
+    let stmt = get_of_type::<ExpressionStatement>(
+        program
+            .statements
+            .leak()
+            .get(0)
+            .expect("expected statemnt[0] to have a value")
+            .get_as_any(),
+    )
+    .expect("program.Statements[0] is ast.ExpressionStatement");
 
     let fn_literal = match &stmt.expression {
-        Some(fn_literal) => match fn_literal.get_fn_literal() {
+        Some(fn_literal) => match get_of_type::<FunctionLiteral>(fn_literal.get_as_any()) {
             Some(fn_literal) => fn_literal,
             _ => panic!("exp is not If expression"),
         },
@@ -325,15 +527,16 @@ fn test_function_literal_parsing() {
     test_literal_expression(x, &"x");
     test_literal_expression(y, &"y");
 
-    match fn_literal
-        .body
-        .as_ref()
-        .unwrap()
-        .statements
-        .get(0)
-        .unwrap()
-        .get_expression_stmt()
-    {
+    match get_of_type::<ExpressionStatement>(
+        fn_literal
+            .body
+            .as_ref()
+            .unwrap()
+            .statements
+            .get(0)
+            .unwrap()
+            .get_as_any(),
+    ) {
         Some(body_stmt) => match &body_stmt.expression {
             Some(exp) => test_infix_expression(exp, &"x", "+", &"y"),
             _ => panic!("function body stmt is not ast.ExpressionStatement"),
@@ -377,15 +580,18 @@ fn test_function_parameter_parsing() {
             program.statements.len()
         );
 
-        let stmt = program
-            .statements
-            .get(0)
-            .expect("expected statemnt[0] to have a value")
-            .get_expression_stmt()
-            .expect("program.Statements[0] is ast.ExpressionStatement");
+        let stmt = get_of_type::<ExpressionStatement>(
+            program
+                .statements
+                .leak()
+                .get(0)
+                .expect("expected statemnt[0] to have a value")
+                .get_as_any(),
+        )
+        .expect("program.Statements[0] is ast.ExpressionStatement");
 
         let fn_literal = match &stmt.expression {
-            Some(fn_literal) => match fn_literal.get_fn_literal() {
+            Some(fn_literal) => match get_of_type::<FunctionLiteral>(fn_literal.get_as_any()) {
                 Some(fn_literal) => fn_literal,
                 _ => panic!("exp is not If expression"),
             },
@@ -423,15 +629,18 @@ fn test_call_expression_parsing() {
         program.statements.len()
     );
 
-    let stmt = program
-        .statements
-        .get(0)
-        .expect("expected statemnt[0] to have a value")
-        .get_expression_stmt()
-        .expect("program.Statements[0] is ast.ExpressionStatement");
+    let stmt = get_of_type::<ExpressionStatement>(
+        program
+            .statements
+            .leak()
+            .get(0)
+            .expect("expected statemnt[0] to have a value")
+            .get_as_any(),
+    )
+    .expect("program.Statements[0] is ast.ExpressionStatement");
 
     let exp = match &stmt.expression {
-        Some(exp) => match exp.get_call_exp() {
+        Some(exp) => match get_of_type::<CallExpression>(exp.get_as_any()) {
             Some(exp) => exp,
             _ => panic!("exp is not If expression"),
         },
@@ -495,15 +704,17 @@ fn test_parsing_prefix_expression() {
             program.statements.len()
         );
 
-        let stmt = program
-            .statements
-            .get(0)
-            .expect("expected statemnt[0] to have a value")
-            .get_expression_stmt()
-            .expect("program.Statements[0] is ast.ExpressionStatement");
+        let stmt = get_of_type::<ExpressionStatement>(
+            program
+                .statements
+                .get(0)
+                .expect("expected statemnt[0] to have a value")
+                .get_as_any(),
+        )
+        .expect("program.Statements[0] is ast.ExpressionStatement");
 
         let exp = match &stmt.expression {
-            Some(exp) => match exp.get_prefix_exp() {
+            Some(exp) => match get_of_type::<PrefixExpression>(exp.get_as_any()) {
                 Some(exp) => exp,
                 _ => panic!("exp is not Identifier"),
             },
@@ -614,12 +825,15 @@ fn test_parsing_infix_expression() {
             program.statements.len()
         );
 
-        let stmt = program
-            .statements
-            .get(0)
-            .expect("expected statemnt[0] to have a value")
-            .get_expression_stmt()
-            .expect("program.Statements[0] is ast.ExpressionStatement");
+        let stmt = get_of_type::<ExpressionStatement>(
+            program
+                .statements
+                .leak()
+                .get(0)
+                .expect("expected statemnt[0] to have a value")
+                .get_as_any(),
+        )
+        .expect("program.Statements[0] is ast.ExpressionStatement");
 
         match &stmt.expression {
             Some(exp) => test_infix_expression(exp, &tt.left_value, &tt.operator, &tt.right_value),
@@ -755,12 +969,13 @@ fn test_operator_precedence_parsing() {
 
 //utils
 fn test_infix_expression(
-    exp: &Box<dyn Expression>,
+    exp: &'static Box<dyn Expression>,
     left: &dyn Any,
     operator: &str,
     right: &dyn Any,
 ) {
-    let op_exp = exp.get_infix_exp().expect("exp is OperatorExpression");
+    let op_exp =
+        get_of_type::<InfixExpression>(exp.get_as_any()).expect("exp is OperatorExpression");
     test_literal_expression(&Box::new(op_exp.left.as_ref()), left);
     assert_eq!(
         op_exp.operator, operator,
@@ -772,7 +987,7 @@ fn test_infix_expression(
 }
 
 fn test_int_literal(il: &Box<&dyn Expression>, value: i64) {
-    let integ = il.get_int_literal().expect("il is not IntergerLiteral");
+    let integ = get_of_type::<IntegerLiteral>(il.get_as_any()).expect("il is not IntergerLiteral");
     assert_eq!(
         integ.value, value,
         "integ.value not {}. got={}",
@@ -789,7 +1004,7 @@ fn test_int_literal(il: &Box<&dyn Expression>, value: i64) {
 }
 
 fn test_identifier(il: &Box<&dyn Expression>, value: &str) {
-    let ident = il.get_ident().expect("il is Identifier");
+    let ident = get_of_type::<Identifier>(il.get_as_any()).expect("il is Identifier");
     assert_eq!(
         ident.value, value,
         "ident.value not {}. got={}",
@@ -806,7 +1021,7 @@ fn test_identifier(il: &Box<&dyn Expression>, value: &str) {
 }
 
 fn test_boolean_literal(il: &Box<&dyn Expression>, value: bool) {
-    let bo = il.get_bool_literal().expect("il is Boolean");
+    let bo = get_of_type::<BooleanLiteral>(il.get_as_any()).expect("il is Boolean");
     assert_eq!(bo.value, value, "bo.value not {}. got={}", bo.value, value);
     assert_eq!(
         bo.token_literal(),
@@ -836,7 +1051,7 @@ fn let_statemnt(s: &Box<dyn Statement>, name: &str) {
         "s.token_literal not 'let' got={}",
         s.token_literal()
     );
-    let let_stmt = s.get_let().unwrap();
+    let let_stmt = get_of_type::<LetStatement>(s.get_as_any()).unwrap();
     assert_eq!(
         let_stmt.name.value, name,
         "letStmt.Name.Value not '{}'. got={}",

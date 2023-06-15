@@ -4,3 +4,21 @@ let add = fn(x, y) {
     return x + y;
 };
 let result = add(one, two);
+
+for (x < 10) {
+}
+
+for {
+}
+
+for (i in 0..10) { 
+    x + y;
+    for (i in (0+1)..10+1) {}
+};
+
+
+let age = if (x > y) { x - y } else { 
+    let age  = 0;
+    for (i in 0..5) {}
+    age;
+ };

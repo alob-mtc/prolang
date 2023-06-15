@@ -1,10 +1,12 @@
 use crate::lexer::token::TokenType;
+use crate::parser::ast::ConditionalIteratorExpression;
 
 use super::{
     ast::{
         BooleanLiteral, CallExpression, Expression, FunctionLiteral, Identifier, IfExpression,
-        InfixExpression, IntegerLiteral, PrefixExpression,
+        InfixExpression, IntegerLiteral, IteratorLiteral, PrefixExpression,
     },
+    get_of_type,
     parser::{Parser, LOWEST, PREFIX},
 };
 
@@ -22,6 +24,8 @@ pub(crate) fn parse_infix_func(
         | TokenType::LT
         | TokenType::GT => Some(parse_infix_expression(p, left)),
         TokenType::LPAREN => Some(parse_call_epression(p, left)),
+        TokenType::IN => parse_conditional_iter_expression(p, left),
+        TokenType::Spreed => Some(parse_spreed_epression(p, left)),
         _ => None,
     }
 }
@@ -49,9 +53,47 @@ fn parse_call_epression(p: &mut Parser, function: Box<dyn Expression>) -> Box<dy
     Box::new(exp)
 }
 
+pub fn parse_conditional_iter_expression(
+    p: &mut Parser,
+    variable: Box<dyn Expression>,
+) -> Option<Box<dyn Expression>> {
+    let ident = get_of_type::<Identifier>(variable.get_as_any())?;
+    let mut expression = ConditionalIteratorExpression {
+        token: p.cur_token.clone(),
+        variable: Identifier {
+            token: ident.token.clone(),
+            value: ident.value.clone(),
+        },
+        r#in: None,
+    };
+    p.next_token();
+
+    expression.r#in = p.parse_expression(LOWEST);
+
+    if !p.expect_peek(TokenType::RPAREN) {
+        return None;
+    }
+
+    Some(Box::new(expression))
+}
+
+fn parse_spreed_epression(p: &mut Parser, int: Box<dyn Expression>) -> Box<dyn Expression> {
+    let mut expression = Box::new(IteratorLiteral {
+        token: p.cur_token.clone(),
+        start: int,
+        end: None,
+    });
+
+    let precedence = p.cur_precedence();
+    p.next_token();
+    expression.end = p.parse_expression(precedence);
+
+    expression
+}
+
 pub(crate) fn parse_prefix_func(p: &mut Parser) -> Option<Box<dyn Expression>> {
     match p.cur_token.token_type {
-        TokenType::IDENT => Some(parse_identifier(p)),
+        TokenType::IDENT => parse_identifier(p),
         TokenType::INT => Some(parse_integer_literal(p)),
         TokenType::BANG => parse_prefix_expression(p),
         TokenType::MINUS => parse_prefix_expression(p),
@@ -78,11 +120,13 @@ fn parse_prefix_expression(p: &mut Parser) -> Option<Box<dyn Expression>> {
     None
 }
 
-fn parse_identifier(p: &Parser) -> Box<dyn Expression> {
-    Box::new(Identifier {
+fn parse_identifier(p: &mut Parser) -> Option<Box<dyn Expression>> {
+    let expression = Identifier {
         token: p.cur_token.clone(),
         value: p.cur_token.literal.clone(),
-    })
+    };
+
+    Some(Box::new(expression))
 }
 
 fn parse_integer_literal(p: &Parser) -> Box<dyn Expression> {

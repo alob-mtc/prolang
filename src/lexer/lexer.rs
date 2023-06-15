@@ -69,7 +69,7 @@ impl Lexer {
                     tok = Token::new(TokenType::BANG, self.ch.to_string(), position);
                 }
             }
-            '/' => tok = Token::new(TokenType::SLASH, self.ch.to_string(), position),
+             '/' => tok = Token::new(TokenType::SLASH, self.ch.to_string(), position),
             '*' => tok = Token::new(TokenType::ASTERISK, self.ch.to_string(), position),
             '<' => tok = Token::new(TokenType::LT, self.ch.to_string(), position),
             '>' => tok = Token::new(TokenType::GT, self.ch.to_string(), position),
@@ -79,6 +79,17 @@ impl Lexer {
             ')' => tok = Token::new(TokenType::RPAREN, self.ch.to_string(), position),
             '{' => tok = Token::new(TokenType::LBRACE, self.ch.to_string(), position),
             '}' => tok = Token::new(TokenType::RBRACE, self.ch.to_string(), position),
+            '.' => {
+                if self.peek_char() == '.' {
+                    let ch = self.ch;
+                    self.read_char();
+                    let mut literal = String::from(ch);
+                    literal.push(ch);
+                    tok = Token::new(TokenType::Spreed, literal, position)
+                } else {
+                    tok = Token::new(TokenType::Dot, self.ch.to_string(), position)
+                }
+            }
             '\0' => tok.token_type = TokenType::EOF,
             _ => {
                 if is_letter(self.ch) {
