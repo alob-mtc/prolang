@@ -1,8 +1,11 @@
+use std::any::Any;
+
 use crate::lexer::token::Token;
 
 pub trait Node {
     fn token_literal(&self) -> &str;
     fn string(&self) -> String;
+    fn get_as_any(&self) -> &dyn Any;
 }
 
 pub trait Statement: Node {
@@ -17,44 +20,9 @@ pub trait Statement: Node {
     }
 }
 
-pub trait Expression: Node {
-    fn get_ident(&self) -> Option<&Identifier> {
-        None
-    }
-    fn get_int_literal(&self) -> Option<&IntegerLiteral> {
-        None
-    }
-    fn get_prefix_exp(&self) -> Option<&PrefixExpression> {
-        None
-    }
-    fn get_infix_exp(&self) -> Option<&InfixExpression> {
-        None
-    }
-    fn get_bool_literal(&self) -> Option<&BooleanLiteral> {
-        None
-    }
-    fn get_if_exp(&self) -> Option<&IfExpression> {
-        None
-    }
-    fn get_fn_literal(&self) -> Option<&FunctionLiteral> {
-        None
-    }
-    fn get_call_exp(&self) -> Option<&CallExpression> {
-        None
-    }
-    fn get_conditional_iter(&self) -> Option<&ConditionalIteratorExpression> {
-        None
-    }
-    fn get_iter_literal(&self) -> Option<&IteratorLiteral> {
-        None
-    }
-}
+pub trait Expression: Node {}
 
-pub trait Iterators: Node {
-    fn get_iter_literal(&self) -> Option<&IteratorLiteral> {
-        None
-    }
-}
+pub trait Iterators: Node {}
 
 pub struct Program {
     pub statements: Vec<Box<dyn Statement>>,
@@ -74,6 +42,9 @@ impl Node for Program {
         }
         out
     }
+    fn get_as_any(&self) -> &dyn Any {
+        self
+    }
 }
 
 pub struct LetStatement {
@@ -81,6 +52,8 @@ pub struct LetStatement {
     pub name: Identifier,
     pub value: Option<Box<dyn Expression>>,
 }
+
+impl Statement for LetStatement {}
 
 impl Node for LetStatement {
     fn token_literal(&self) -> &str {
@@ -99,11 +72,8 @@ impl Node for LetStatement {
 
         out
     }
-}
-
-impl Statement for LetStatement {
-    fn get_let(&self) -> Option<&LetStatement> {
-        Some(self)
+    fn get_as_any(&self) -> &dyn Any {
+        self
     }
 }
 
@@ -113,6 +83,8 @@ pub struct Identifier {
     pub value: String,
 }
 
+impl Expression for Identifier {}
+
 impl Node for Identifier {
     fn token_literal(&self) -> &str {
         &self.token.literal
@@ -120,17 +92,20 @@ impl Node for Identifier {
     fn string(&self) -> String {
         self.value.to_owned()
     }
-}
-
-impl Expression for Identifier {
-    fn get_ident(&self) -> Option<&Identifier> {
-        Some(self)
+    fn get_as_any(&self) -> &dyn Any {
+        self
     }
 }
 
 pub struct ExpressionStatement {
     pub token: Token, //first token of the expression
     pub expression: Option<Box<dyn Expression>>,
+}
+
+impl Statement for ExpressionStatement {
+    fn get_expression_stmt(&self) -> Option<&ExpressionStatement> {
+        Some(self)
+    }
 }
 
 impl Node for ExpressionStatement {
@@ -144,11 +119,9 @@ impl Node for ExpressionStatement {
 
         "".to_owned()
     }
-}
 
-impl Statement for ExpressionStatement {
-    fn get_expression_stmt(&self) -> Option<&ExpressionStatement> {
-        Some(self)
+    fn get_as_any(&self) -> &dyn Any {
+        self
     }
 }
 
@@ -174,12 +147,17 @@ impl Node for ReturnStatemnt {
 
         out
     }
+    fn get_as_any(&self) -> &dyn Any {
+        self
+    }
 }
 
 pub struct IntegerLiteral {
     pub token: Token,
     pub value: i64,
 }
+
+impl Expression for IntegerLiteral {}
 
 impl Node for IntegerLiteral {
     fn token_literal(&self) -> &str {
@@ -189,11 +167,8 @@ impl Node for IntegerLiteral {
     fn string(&self) -> String {
         self.token.literal.to_owned()
     }
-}
-
-impl Expression for IntegerLiteral {
-    fn get_int_literal(&self) -> Option<&IntegerLiteral> {
-        Some(self)
+    fn get_as_any(&self) -> &dyn Any {
+        self
     }
 }
 
@@ -206,17 +181,15 @@ impl Node for BooleanLiteral {
     fn token_literal(&self) -> &str {
         &self.token.literal
     }
-
     fn string(&self) -> String {
         self.token.literal.to_owned()
     }
-}
-
-impl Expression for BooleanLiteral {
-    fn get_bool_literal(&self) -> Option<&BooleanLiteral> {
-        Some(self)
+    fn get_as_any(&self) -> &dyn Any {
+        self
     }
 }
+
+impl Expression for BooleanLiteral {}
 
 pub struct PrefixExpression {
     pub token: Token, //prefix token
@@ -224,17 +197,12 @@ pub struct PrefixExpression {
     pub right: Option<Box<dyn Expression>>,
 }
 
-impl Expression for PrefixExpression {
-    fn get_prefix_exp(&self) -> Option<&PrefixExpression> {
-        Some(self)
-    }
-}
+impl Expression for PrefixExpression {}
 
 impl Node for PrefixExpression {
     fn token_literal(&self) -> &str {
         &self.token.literal
     }
-
     fn string(&self) -> String {
         let mut out = String::new();
         out.push('(');
@@ -243,6 +211,9 @@ impl Node for PrefixExpression {
         out.push(')');
 
         out
+    }
+    fn get_as_any(&self) -> &dyn Any {
+        self
     }
 }
 
@@ -253,17 +224,12 @@ pub struct InfixExpression {
     pub right: Option<Box<dyn Expression>>,
 }
 
-impl Expression for InfixExpression {
-    fn get_infix_exp(&self) -> Option<&InfixExpression> {
-        Some(self)
-    }
-}
+impl Expression for InfixExpression {}
 
 impl Node for InfixExpression {
     fn token_literal(&self) -> &str {
         &self.token.literal
     }
-
     fn string(&self) -> String {
         let mut out = String::new();
         out.push('(');
@@ -276,6 +242,9 @@ impl Node for InfixExpression {
 
         out
     }
+    fn get_as_any(&self) -> &dyn Any {
+        self
+    }
 }
 
 pub struct IfExpression {
@@ -284,6 +253,8 @@ pub struct IfExpression {
     pub consequence: Option<BlockStatement>,
     pub alternative: Option<BlockStatement>,
 }
+
+impl Expression for IfExpression {}
 
 impl Node for IfExpression {
     fn token_literal(&self) -> &str {
@@ -303,11 +274,8 @@ impl Node for IfExpression {
 
         out
     }
-}
-
-impl Expression for IfExpression {
-    fn get_if_exp(&self) -> Option<&IfExpression> {
-        Some(self)
+    fn get_as_any(&self) -> &dyn Any {
+        self
     }
 }
 
@@ -330,6 +298,9 @@ impl Node for BlockStatement {
 
         out
     }
+    fn get_as_any(&self) -> &dyn Any {
+        self
+    }
 }
 
 pub struct FunctionLiteral {
@@ -337,6 +308,8 @@ pub struct FunctionLiteral {
     pub parameters: Vec<Identifier>,
     pub body: Option<BlockStatement>,
 }
+
+impl Expression for FunctionLiteral {}
 
 impl Node for FunctionLiteral {
     fn token_literal(&self) -> &str {
@@ -360,11 +333,8 @@ impl Node for FunctionLiteral {
 
         out
     }
-}
-
-impl Expression for FunctionLiteral {
-    fn get_fn_literal(&self) -> Option<&FunctionLiteral> {
-        Some(self)
+    fn get_as_any(&self) -> &dyn Any {
+        self
     }
 }
 
@@ -373,6 +343,8 @@ pub struct CallExpression {
     pub function: Box<dyn Expression>,
     pub arguments: Vec<Box<dyn Expression>>,
 }
+
+impl Expression for CallExpression {}
 
 impl Node for CallExpression {
     fn token_literal(&self) -> &str {
@@ -392,11 +364,8 @@ impl Node for CallExpression {
 
         out
     }
-}
-
-impl Expression for CallExpression {
-    fn get_call_exp(&self) -> Option<&CallExpression> {
-        Some(self)
+    fn get_as_any(&self) -> &dyn Any {
+        self
     }
 }
 
@@ -412,6 +381,8 @@ pub enum ForLoopCondition {
     For(Box<dyn Expression>),
 }
 
+impl Statement for ForLoopExpression {}
+
 impl Node for ForLoopExpression {
     fn token_literal(&self) -> &str {
         &self.token.literal
@@ -422,11 +393,8 @@ impl Node for ForLoopExpression {
 
         out
     }
-}
-
-impl Statement for ForLoopExpression {
-    fn get_for_exp(&self) -> Option<&ForLoopExpression> {
-        Some(self)
+    fn get_as_any(&self) -> &dyn Any {
+        self
     }
 }
 
@@ -436,6 +404,8 @@ pub struct ConditionalIteratorExpression {
     pub r#in: Option<Box<dyn Expression>>,
 }
 
+impl Expression for ConditionalIteratorExpression {}
+
 impl Node for ConditionalIteratorExpression {
     fn token_literal(&self) -> &str {
         todo!()
@@ -444,11 +414,8 @@ impl Node for ConditionalIteratorExpression {
     fn string(&self) -> String {
         todo!()
     }
-}
-
-impl Expression for ConditionalIteratorExpression {
-    fn get_conditional_iter(&self) -> Option<&ConditionalIteratorExpression> {
-        Some(self)
+    fn get_as_any(&self) -> &dyn Any {
+        self
     }
 }
 
@@ -458,6 +425,10 @@ pub struct IteratorLiteral {
     pub end: Option<Box<dyn Expression>>,
 }
 
+impl Iterators for IteratorLiteral {}
+
+impl Expression for IteratorLiteral {}
+
 impl Node for IteratorLiteral {
     fn token_literal(&self) -> &str {
         todo!()
@@ -466,11 +437,10 @@ impl Node for IteratorLiteral {
     fn string(&self) -> String {
         todo!()
     }
+    fn get_as_any(&self) -> &dyn Any {
+        self
+    }
 }
-
-impl Iterators for IteratorLiteral {}
-
-impl Expression for IteratorLiteral {}
 
 #[cfg(test)]
 mod test {
@@ -479,7 +449,7 @@ mod test {
     use super::{Identifier, LetStatement, Node, Program};
 
     #[test]
-        fn test_string() {
+    fn test_string() {
         let program = Program {
             statements: vec![Box::new(LetStatement {
                 token: Token {

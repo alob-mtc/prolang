@@ -4,9 +4,11 @@ use crate::lexer::lexer::Lexer;
 use crate::lexer::token::{Token, TokenType};
 
 use super::ast::{
-    BlockStatement, Expression, ExpressionStatement, ForLoopCondition, ForLoopExpression,
-    Identifier, LetStatement, Program, ReturnStatemnt, Statement,
+    BlockStatement, ConditionalIteratorExpression, Expression, ExpressionStatement,
+    ForLoopCondition, ForLoopExpression, Identifier, InfixExpression, LetStatement, Program,
+    ReturnStatemnt, Statement,
 };
+use super::is_of_type;
 use super::parse_func::{parse_infix_func, parse_prefix_func};
 
 pub(crate) const LOWEST: i32 = 1;
@@ -235,10 +237,10 @@ impl Parser {
         } else {
             self.next_token();
             if let Some(condition) = self.parse_expression(LOWEST) {
-                if condition.get_infix_exp().is_some() {
+                if is_of_type::<InfixExpression>(condition.get_as_any()) {
                     expression.condition = Some(ForLoopCondition::For(condition));
                     self.next_token();
-                } else if condition.get_conditional_iter().is_some() {
+                } else if is_of_type::<ConditionalIteratorExpression>(condition.get_as_any()) {
                     expression.condition = Some(ForLoopCondition::ForIn(condition))
                 }
                 if !self.expect_peek(TokenType::LBRACE) {
@@ -308,7 +310,7 @@ impl Parser {
     }
     fn peek_error(&mut self, t: TokenType) {
         let msg = format!(
-            "main.pl:{}:{} \n expected next token to be {:?}, got {:?} instead",
+            "main.pr:{}:{} \n expected next token to be {:?}, got {:?} instead",
             self.cur_token.position.0, self.cur_token.position.1, t, self.peek_token.token_type,
         );
         self.errors.push(msg)

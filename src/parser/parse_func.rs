@@ -6,6 +6,7 @@ use super::{
         BooleanLiteral, CallExpression, Expression, FunctionLiteral, Identifier, IfExpression,
         InfixExpression, IntegerLiteral, IteratorLiteral, PrefixExpression,
     },
+    get_of_type,
     parser::{Parser, LOWEST, PREFIX},
 };
 
@@ -56,7 +57,7 @@ pub fn parse_conditional_iter_expression(
     p: &mut Parser,
     variable: Box<dyn Expression>,
 ) -> Option<Box<dyn Expression>> {
-    let ident = variable.get_ident()?;
+    let ident = get_of_type::<Identifier>(variable.get_as_any())?;
     let mut expression = ConditionalIteratorExpression {
         token: p.cur_token.clone(),
         variable: Identifier {
