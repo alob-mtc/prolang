@@ -13,6 +13,8 @@ use crate::{
     },
 };
 
+use super::ast::{ConditionalIteratorExpression, IteratorLiteral};
+
 #[test]
 fn test_let_statement() {
     let input = String::from(
@@ -457,25 +459,25 @@ fn test_for_expression_type_forin_parsing() {
 }
 
 fn test_conditional_iter_expression(condition: &Box<&dyn Expression>) {
-    // match get_of_type::<ConditionalIteratorExpression>(condition) {
-    //     Some(condition) => {
-    //         test_literal_expression(&Box::new(&condition.variable), &"i");
-    //         match &condition.r#in {
-    //             Some(r#in) => match get_of_type::<IteratorLiteral>(r#in) {
-    //                 Some(iter) => {
-    //                     test_literal_expression(&Box::new(iter.start.as_ref()), &"0");
-    //                     test_literal_expression(
-    //                         &Box::new(iter.end.as_ref().unwrap().as_ref()),
-    //                         &"10",
-    //                     )
-    //                 }
-    //                 None => panic!("conditional not iteraltor literal"),
-    //             },
-    //             None => panic!("condition iter does not have in expression"),
-    //         }
-    //     }
-    //     None => todo!(),
-    // }
+    match get_of_type::<ConditionalIteratorExpression>(condition.get_as_any()) {
+        Some(condition) => {
+            test_literal_expression(&Box::new(&condition.variable), &"i");
+            match &condition.r#in {
+                Some(r#in) => match get_of_type::<IteratorLiteral>(r#in.get_as_any()) {
+                    Some(iter) => {
+                        test_literal_expression(&Box::new(iter.start.as_ref()), &"0");
+                        test_literal_expression(
+                            &Box::new(iter.end.as_ref().unwrap().as_ref()),
+                            &"10",
+                        )
+                    }
+                    None => panic!("conditional not iteraltor literal"),
+                },
+                None => panic!("condition iter does not have in expression"),
+            }
+        }
+        None => todo!(),
+    }
 }
 
 #[test]
