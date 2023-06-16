@@ -36,15 +36,12 @@ impl Lexer {
     pub fn next_token(&mut self) -> Token {
         let mut tok = Token::default();
 
-        if self.ch == '\n' {
-            self.line += 1;
-        }
-
         let position = (self.line, self.position);
 
         self.skip_whitespace();
 
         match self.ch {
+            '\n' => self.line += 1,
             '=' => {
                 if self.peek_char() == '=' {
                     let ch = self.ch;
@@ -69,7 +66,22 @@ impl Lexer {
                     tok = Token::new(TokenType::BANG, self.ch.to_string(), position);
                 }
             }
-             '/' => tok = Token::new(TokenType::SLASH, self.ch.to_string(), position),
+            '/' => {
+                if self.peek_char() == '/' {
+                    self.read_char();
+                    self.skip_comment();
+                    return self.next_token();
+                } else if self.peek_char() == '*' {
+                    self.read_char();
+                    self.skip_comment();
+                    // Advance past the closing "*/"
+                    self.read_char();
+                    self.read_char();
+                    return self.next_token()
+                } else {
+                    tok = Token::new(TokenType::SLASH, self.ch.to_string(), position)
+                }
+            }
             '*' => tok = Token::new(TokenType::ASTERISK, self.ch.to_string(), position),
             '<' => tok = Token::new(TokenType::LT, self.ch.to_string(), position),
             '>' => tok = Token::new(TokenType::GT, self.ch.to_string(), position),
@@ -113,9 +125,22 @@ impl Lexer {
     }
 
     fn skip_whitespace(&mut self) {
-        while ['\t', '\n', '\r', ' '].contains(&self.ch) {
+        while ['\t', '\r', ' '].contains(&self.ch) {
             self.read_char()
         }
+    }
+
+    fn skip_comment(&mut self ) {
+        if self.ch == '/' {
+            while self.ch != '\n' && self.ch != '\0' {
+                self.read_char()
+            }    
+        } else {
+            while !(self.ch == '*' && self.peek_char() == '/') {
+                self.read_char()
+            }    
+        }
+        
     }
 
     fn read_indentifier(&mut self) -> String {
