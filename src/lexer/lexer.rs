@@ -41,7 +41,11 @@ impl Lexer {
         self.skip_whitespace();
 
         match self.ch {
-            '\n' => self.line += 1,
+            '\n' => {
+                self.line += 1;
+                self.read_char();
+                return self.next_token()
+            },
             '=' => {
                 if self.peek_char() == '=' {
                     let ch = self.ch;

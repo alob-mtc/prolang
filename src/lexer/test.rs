@@ -10,7 +10,7 @@ fn test_next_token() {
         };
         let result = add(five, ten);
 
-        !-/*5;
+        !-*/5;
         5 < 10 > 5;
         if (5 < 10) {
             return true;
@@ -181,12 +181,12 @@ fn test_next_token() {
             expected_literal: "-".to_string(),
         },
         TestCase {
-            expected_type: TokenType::SLASH,
-            expected_literal: "/".to_string(),
-        },
-        TestCase {
             expected_type: TokenType::ASTERISK,
             expected_literal: "*".to_string(),
+        },
+        TestCase {
+            expected_type: TokenType::SLASH,
+            expected_literal: "/".to_string(),
         },
         TestCase {
             expected_type: TokenType::INT,
