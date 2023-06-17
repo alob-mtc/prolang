@@ -3,6 +3,7 @@ use super::token::{lookup_ident, Token, TokenType};
 pub struct Lexer {
     input: String,
     line: usize,
+    line_column: usize,
     position: usize,
     read_position: usize,
     ch: char,
@@ -13,6 +14,7 @@ impl Lexer {
         let mut l = Self {
             input,
             line: 1,
+            line_column:1,
             position: 0,
             read_position: 0,
             ch: '\0',
@@ -27,6 +29,7 @@ impl Lexer {
         self.ch = self.input.chars().nth(self.read_position).unwrap_or('\0');
         self.position = self.read_position;
         self.read_position += 1;
+        self.line_column += 1;
     }
 
     fn peek_char(&self) -> char {
@@ -36,15 +39,17 @@ impl Lexer {
     pub fn next_token(&mut self) -> Token {
         let mut tok = Token::default();
 
-        if self.ch == '\n' {
-            self.line += 1;
-        }
-
-        let position = (self.line, self.position);
+        let position = (self.line, self.line_column);
 
         self.skip_whitespace();
 
         match self.ch {
+            '\n' => {
+                self.line += 1;
+                self.line_column = 1;
+                self.read_char();
+                return self.next_token()
+            },
             '=' => {
                 if self.peek_char() == '=' {
                     let ch = self.ch;
@@ -69,7 +74,22 @@ impl Lexer {
                     tok = Token::new(TokenType::BANG, self.ch.to_string(), position);
                 }
             }
-             '/' => tok = Token::new(TokenType::SLASH, self.ch.to_string(), position),
+            '/' => {
+                if self.peek_char() == '/' {
+                    self.read_char();
+                    self.skip_comment();
+                    return self.next_token();
+                } else if self.peek_char() == '*' {
+                    self.read_char();
+                    self.skip_comment();
+                    // Advance past the closing "*/"
+                    self.read_char();
+                    self.read_char();
+                    return self.next_token()
+                } else {
+                    tok = Token::new(TokenType::SLASH, self.ch.to_string(), position)
+                }
+            }
             '*' => tok = Token::new(TokenType::ASTERISK, self.ch.to_string(), position),
             '<' => tok = Token::new(TokenType::LT, self.ch.to_string(), position),
             '>' => tok = Token::new(TokenType::GT, self.ch.to_string(), position),
@@ -113,9 +133,22 @@ impl Lexer {
     }
 
     fn skip_whitespace(&mut self) {
-        while ['\t', '\n', '\r', ' '].contains(&self.ch) {
+        while ['\t', '\r', ' '].contains(&self.ch) {
             self.read_char()
         }
+    }
+
+    fn skip_comment(&mut self ) {
+        if self.ch == '/' {
+            while self.ch != '\n' && self.ch != '\0' {
+                self.read_char()
+            }    
+        } else {
+            while !(self.ch == '*' && self.peek_char() == '/') {
+                self.read_char()
+            }    
+        }
+        
     }
 
     fn read_indentifier(&mut self) -> String {

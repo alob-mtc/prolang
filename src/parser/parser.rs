@@ -314,7 +314,7 @@ impl Parser {
     }
     fn peek_error(&mut self, t: TokenType) {
         let msg = format!(
-            "main.pr:{}:{} \n expected next token to be {:?}, got {:?} instead",
+            "main.pr:{}:{} \n unexpected character -> expected next token to be {:?}, got {:?} instead",
             self.cur_token.position.0, self.cur_token.position.1, t, self.peek_token.token_type,
         );
         self.errors.push(msg)
