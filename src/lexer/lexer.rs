@@ -14,7 +14,7 @@ impl Lexer {
         let mut l = Self {
             input,
             line: 1,
-            line_column:1,
+            line_column: 0,
             position: 0,
             read_position: 0,
             ch: '\0',
@@ -39,23 +39,24 @@ impl Lexer {
     pub fn next_token(&mut self) -> Token {
         let mut tok = Token::default();
 
-        let position = (self.line, self.line_column);
+        let mut position = (self.line, self.line_column);
 
         self.skip_whitespace();
 
         match self.ch {
             '\n' => {
                 self.line += 1;
-                self.line_column = 1;
                 self.read_char();
-                return self.next_token()
-            },
+                self.line_column = 1;
+                return self.next_token();
+            }
             '=' => {
                 if self.peek_char() == '=' {
                     let ch = self.ch;
                     self.read_char();
                     let mut literal = String::from(ch);
                     literal.push(self.ch);
+                    position.1 = self.line_column;
                     tok = Token::new(TokenType::EQ, literal, position);
                 } else {
                     tok = Token::new(TokenType::ASSIGN, self.ch.to_string(), position);
@@ -69,6 +70,7 @@ impl Lexer {
                     self.read_char();
                     let mut literal = String::from(ch);
                     literal.push(self.ch);
+                    position.1 = self.line_column;
                     tok = Token::new(TokenType::NotEq, literal, position);
                 } else {
                     tok = Token::new(TokenType::BANG, self.ch.to_string(), position);
@@ -85,7 +87,7 @@ impl Lexer {
                     // Advance past the closing "*/"
                     self.read_char();
                     self.read_char();
-                    return self.next_token()
+                    return self.next_token();
                 } else {
                     tok = Token::new(TokenType::SLASH, self.ch.to_string(), position)
                 }
@@ -105,6 +107,7 @@ impl Lexer {
                     self.read_char();
                     let mut literal = String::from(ch);
                     literal.push(ch);
+                    position.1 = self.line_column;
                     tok = Token::new(TokenType::Spreed, literal, position)
                 } else {
                     tok = Token::new(TokenType::Dot, self.ch.to_string(), position)
@@ -115,11 +118,13 @@ impl Lexer {
                 if is_letter(self.ch) {
                     tok.literal = self.read_indentifier();
                     tok.token_type = lookup_ident(&tok.literal);
+                    position.1 += tok.literal.len();
                     tok.position = position;
                     return tok;
                 } else if is_digit(self.ch) {
                     tok.literal = self.read_number();
                     tok.token_type = TokenType::INT;
+                    position.1 += tok.literal.len();
                     tok.position = position;
                     return tok;
                 } else {
@@ -138,17 +143,20 @@ impl Lexer {
         }
     }
 
-    fn skip_comment(&mut self ) {
+    fn skip_comment(&mut self) {
         if self.ch == '/' {
             while self.ch != '\n' && self.ch != '\0' {
                 self.read_char()
-            }    
+            }
+            self.line += 1
         } else {
             while !(self.ch == '*' && self.peek_char() == '/') {
+                if self.ch == '\n' {
+                    self.line += 1
+                }
                 self.read_char()
-            }    
+            }
         }
-        
     }
 
     fn read_indentifier(&mut self) -> String {

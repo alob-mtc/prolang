@@ -353,3 +353,74 @@ fn test_next_token() {
         )
     }
 }
+
+
+#[test]
+fn test_line_and_column() {
+    let input = "
+let five = 5;
+        "
+    .to_string();
+    struct TestCase {
+        expected_type: TokenType,
+        expected_literal: String,
+        expected_column: usize,
+        expected_line: usize,
+    }
+
+    let tests = [
+        TestCase {
+            expected_type: TokenType::LET,
+            expected_literal: "let".to_string(),
+            expected_column: 3,
+            expected_line: 2,
+        },
+        TestCase {
+            expected_type: TokenType::IDENT,
+            expected_literal: "five".to_string(),
+            expected_column: 8,
+            expected_line: 2,
+        },
+        TestCase {
+            expected_type: TokenType::ASSIGN,
+            expected_literal: "=".to_string(),
+            expected_column: 10,
+            expected_line: 2,
+        },
+        TestCase {
+            expected_type: TokenType::INT,
+            expected_literal: "5".to_string(),
+            expected_column: 12,
+            expected_line: 2,
+        },
+        TestCase {
+            expected_type: TokenType::SEMICOLON,
+            expected_literal: ";".to_string(),
+            expected_column: 13,
+            expected_line: 2,
+        },
+        TestCase {
+            expected_type: TokenType::EOF,
+            expected_literal: "".to_string(),
+            expected_column: 1,
+            expected_line: 0,
+        },
+    ];
+
+    let mut l = Lexer::new(input);
+    for tt in tests {
+        let tok = l.next_token();
+        assert_eq!(
+            tok.token_type, tt.expected_type,
+            "test - tokentype wrong. extected={:?}, got={:?} - literal_e: {}",
+            tok.token_type, tt.expected_type, tok.literal,
+        );
+        assert_eq!(
+            tok.literal, tt.expected_literal,
+            "test - literal wrong. extected={}, got={}",
+            tok.literal, tt.expected_literal,
+        );
+        assert_eq!(tok.position.0, tt.expected_line, "test - wrong line number. expected={}, got={}", tok.position.0, tt.expected_line);
+        assert_eq!(tok.position.1, tt.expected_column, "test - wrong column number. expected={}, got={}", tok.position.1, tt.expected_column);
+    }
+}
