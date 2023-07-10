@@ -8,11 +8,15 @@ It supports mathematical expressions, variable bindings, functions, conditionals
 
 And then there are the different data types:
 
-- integers
-- booleans
-- strings
-- arrays
-- hashes
+- integers => int, float
+- booleans => bool: true, false
+- strings => str: ""
+- char => ''
+- arrays => [T], T: (int|bool|...)
+- hashes => {"": ""}
+- struct => struct {}
+- enum => enum(x,y,z), enum(x(int), y(float), z(bool))
+- interface => interface { run(): number; fn }
 
 ### language snipet
 
@@ -30,39 +34,24 @@ Run repl (interactive mode)
 $ cargo run
 ```
 
-##### Expressions
-
-```rs
-let one = 1;
-let two = 2;
-let add = fn(x, y) {
-    return x + y;
-};
-let result = add(one, two);
-```
-
 ##### If-expression
 
 ```rs
-let d = if (c > a) { 99 } else { 100 };
+let d: int = if (c > a) { 99 } else { 100 };
 ```
 
 ##### Function-expression & function-closure: higher-order
 
 ```rs
-let addThree = fn(x) { return x + 3 };
-
-println("x+3 = ", addThree(3));
-
-let add = fn(a,b) { a + b};
-let sub = fn(a,b) { a - b};
-let applyFunc = fn(a,b,func) { func(a,b) };
+let add = fn(a,b): int { a + b};
+let sub = fn(a,b): int { a - b};
+let applyFunc = fn(a: int, b: int ,func: fn(int, int): int): int { func(a,b) };
 
 applyFunc(2, 2, add); // 4
 applyFunc(10, 2, sub); // 8
 
-let makeGreeter = fn(greeting) {
-    return fn(name) {
+let makeGreeter: fn(str): str = fn(greeting: str): fn(str): str {
+    return fn(name: str): str {
         return greeting + " " + name + "!"
     }
 };
@@ -74,12 +63,12 @@ hello("John"); // Hello John!
 ##### Array
 
 ```rs
-let arr = [1, 2, 3, 4];
+let arr: []int = [1, 2, 3, 4];
 len(arr); // 4
 len("hello world"); //11
 
-let a = [1, 2, 3, 4];
-let b = push(a, 5);
+let a: []int = [1, 2, 3, 4];
+let b: []int = push(a, 5);
 
 println(a) // [1, 2, 3, 4]
 println(b) // [1, 2, 3, 4, 5]
@@ -93,11 +82,11 @@ println(rest(a)) // [3, 4]
 ##### Self calling function
 
 ```rs
-let even = fn() {
-    let arr = [];
+let even: []int = fn(): []int {
+    let arr: []int = [];
     for (i in 0..10) {
         if i % 2 == 0 {
-        arr = push(arr, i);
+            arr = push(arr, i);
         }
     }
     return arr;
@@ -110,7 +99,7 @@ println("list of even number:", even)
 ##### Recursion
 
 ```rs
-let fib = fn(n) {
+let fib: float = fn(n): float {
     if n <= 1 {
         return n;
     };
@@ -164,7 +153,7 @@ for {
     // action
 };
 
-let x = 0;
+let x: int = 0;
 for (x < 10) {
     x = x + 1; // TODO: implement "+=", "-="
 };
@@ -178,10 +167,28 @@ for (i in 0..10) {
 ##### Hash
 
 ```rs
-let myHash = {"name": "Jimmy", "age": 72, "band": "Led Zeppelin"};
+let myHash: = {"name": "Jimmy", "age": 72, "band": "Led Zeppelin"};
 myHash["name"] // Jimmy
 myHash["age"] // 72
 
+```
+
+##### enum
+
+```rs
+
+let Event: enum = enum(add, remove, create, key_press(str))
+println(Event.add);
+println(Event.remove);
+println(Event.created);
+
+let Option = enum(some(num), none)
+
+Option.some(1)
+
+
+let age: num = 2;
+let name: str = "bola";
 ```
 
 ### TODO:
