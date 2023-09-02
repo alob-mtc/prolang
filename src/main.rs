@@ -1,18 +1,30 @@
-use std::env::args;
+use crate::core::runner::{file_runner, repl};
+use clap::{Parser, Subcommand};
 
-use crate::runner::{file_runner, repl};
-mod lexer;
-mod parser;
-mod runner;
+mod core;
+
+/// The `Prolang` Interpreter CLI.
+#[derive(Debug, Parser)]
+#[clap(author, version, about, long_about = None)]
+struct ProlangCLI {
+    // CLI args
+    #[clap(subcommand)]
+    command: Command,
+}
+
+#[derive(Debug, Subcommand)]
+enum Command {
+    /// Runs the `Prolang` file provided.
+    Run { file_path: String },
+    /// Init an interactive repl session
+    Repl,
+}
 
 fn main() {
-    let args: Vec<String> = args().collect();
+    let prolang_cli = ProlangCLI::parse();
 
-    if args.len() > 2 {
-        println!("Usge: prolang [script]")
-    } else if args.len() == 2 {
-        file_runner::run_file(&args[1])
-    } else {
-        repl::start();
+    match prolang_cli.command {
+        Command::Run { file_path } => file_runner::run_file(file_path),
+        Command::Repl => repl::start(),
     }
 }

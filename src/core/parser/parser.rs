@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
-use crate::lexer::lexer::Lexer;
-use crate::lexer::token::{Token, TokenType};
+use crate::core::lexer::lexer::Lexer;
+use crate::core::lexer::token::{Token, TokenType};
 
 use super::ast::{
     BlockStatement, ConditionalIteratorExpression, Expression, ExpressionStatement,

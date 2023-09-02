@@ -1,5 +1,5 @@
-use crate::lexer::token::TokenType;
-use crate::parser::ast::ConditionalIteratorExpression;
+use crate::core::lexer::token::TokenType;
+use crate::core::parser::ast::ConditionalIteratorExpression;
 
 use super::{
     ast::{

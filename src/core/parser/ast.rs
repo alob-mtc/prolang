@@ -1,6 +1,6 @@
 use std::any::Any;
 
-use crate::lexer::token::Token;
+use crate::core::lexer::token::Token;
 
 pub trait Node {
     fn token_literal(&self) -> &str;
@@ -463,7 +463,7 @@ impl Node for IteratorLiteral {
 
 #[cfg(test)]
 mod test {
-    use crate::lexer::token::{Token, TokenType};
+    use crate::core::lexer::token::{Token, TokenType};
 
     use super::{Identifier, LetStatement, Node, Program};
 

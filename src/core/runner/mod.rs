@@ -1,4 +1,4 @@
-use crate::{
+use crate::core::{
     lexer::lexer::Lexer,
     parser::{ast::Node, parser::Parser},
 };
@@ -14,13 +14,13 @@ fn print_parse_errors(errors: &Vec<String>) {
     }
 }
 
-fn exec(input: &str) {
+fn exec(input: &str) -> String {
     let l = Lexer::new(input.trim().to_string());
     let mut p = Parser::new(l);
     let program = p.parse_program().unwrap();
     if p.errors().len() != 0 {
         print_parse_errors(p.errors());
-        return;
+        return "".to_string();
     }
-    println!("{}", program.string());
+    program.string()
 }

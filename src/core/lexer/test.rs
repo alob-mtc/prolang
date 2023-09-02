@@ -1,4 +1,4 @@
-use crate::lexer::{lexer::Lexer, token::TokenType};
+use crate::core::lexer::{lexer::Lexer, token::TokenType};
 
 #[test]
 fn test_next_token() {

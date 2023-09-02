@@ -1,19 +1,18 @@
 use std::any::Any;
 
-use crate::{
+use crate::core::{
     lexer::lexer::Lexer,
-    parser::{ast::ExpressionStatement, parser::Parser},
     parser::{
         ast::{
-            BooleanLiteral, CallExpression, Expression, ForLoopExpression, FunctionLiteral,
-            Identifier, IfExpression, InfixExpression, IntegerLiteral, LetStatement, Node,
+            BooleanLiteral, CallExpression, ConditionalIteratorExpression, Expression,
+            ExpressionStatement, ForLoopCondition, ForLoopExpression, FunctionLiteral, Identifier,
+            IfExpression, InfixExpression, IntegerLiteral, IteratorLiteral, LetStatement, Node,
             PrefixExpression, Statement,
         },
         get_of_type,
+        parser::Parser,
     },
 };
-
-use super::ast::{ConditionalIteratorExpression, IteratorLiteral};
 
 #[test]
 fn test_let_statement() {
@@ -329,7 +328,7 @@ fn test_for_expression_type_loop_parsing() {
 
     match &stmt.condition {
         Some(condition) => match condition {
-            crate::parser::ast::ForLoopCondition::Loop => (),
+            ForLoopCondition::Loop => (),
             _ => panic!(),
         },
         None => panic!(),
@@ -380,9 +379,7 @@ fn test_for_expression_type_for_parsing() {
 
     match &stmt.condition {
         Some(condition) => match condition {
-            crate::parser::ast::ForLoopCondition::For(condition) => {
-                test_infix_expression(condition, &"x", "<", &"y")
-            }
+            ForLoopCondition::For(condition) => test_infix_expression(condition, &"x", "<", &"y"),
             _ => panic!(),
         },
         None => panic!(),
@@ -433,7 +430,7 @@ fn test_for_expression_type_forin_parsing() {
 
     match &stmt.condition {
         Some(condition) => match condition {
-            crate::parser::ast::ForLoopCondition::ForIn(condition) => {
+            ForLoopCondition::ForIn(condition) => {
                 test_conditional_iter_expression(&Box::new(condition.as_ref()));
             }
             _ => panic!(),
