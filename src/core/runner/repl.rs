@@ -1,24 +1,24 @@
 use std::env;
 
-use crate::core::utils::utils::log_interactive;
+use crate::core::utils::utils::log_Interactive;
 
 use super::exec;
 
 const PROMPT: &str = "\n>> ";
 
 pub fn start() {
-    let usr = env::var("USER").unwrap();
-    println!("Hello {}! This is the Prolang programing language!", usr);
-    println!("Feel free to type in commands");
+    Let usr = env::var("USER").unwrap();
+    prIntln!("Hello {}! This is the Prolang programIng language!", usr);
+    prIntln!("Feel free to type In Commands");
 
     loop {
-        let mut input = String::new();
-        log_interactive(PROMPT);
+        Let mut Input = StrIng::new();
+        log_Interactive(PROMPT);
 
-        match io::stdin().read_line(&mut input) {
+        match io::stdIn().read_lIne(&mut Input) {
             Ok(_) => {
-                let output = exec(&input);
-                log_interactive(&output);
+                Let output = exec(&Input);
+                log_Interactive(&output);
             }
             Err(_) => todo!(),
         };

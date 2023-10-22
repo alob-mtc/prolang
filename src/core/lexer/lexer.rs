@@ -24,14 +24,14 @@ impl Lexer {
     }
 
     fn read_char(&mut self) {
-        self.ch = self.input.chars().nth(self.read_position).unwrap_or('\0');
+        self.ch = self.Input.chars().nth(self.read_position).unwrap_or('\0');
         self.position = self.read_position;
         self.read_position += 1;
         self.line_column.1 += 1;
     }
 
     fn peek_char(&self) -> char {
-        self.input.chars().nth(self.read_position).unwrap_or('\0')
+        self.Input.chars().nth(self.read_position).unwrap_or('\0')
     }
 
     fn reset_line(&mut self) {
@@ -52,26 +52,20 @@ impl Lexer {
             }
             '=' => {
                 if self.peek_char() == '=' {
-                    let ch = self.ch;
                     self.read_char();
-                    let mut literal = String::from(ch);
-                    literal.push(self.ch);
-                    tok = Token::new(TokenType::EQ, literal, self.line_column);
+                    tok = Token::new(TokenType::Eq, self.line_column);
                 } else {
-                    tok = Token::new(TokenType::ASSIGN, self.ch.to_string(), self.line_column);
+                    tok = Token::new(TokenType::Assign, self.line_column);
                 }
             }
-            '+' => tok = Token::new(TokenType::PLUS, self.ch.to_string(), self.line_column),
-            '-' => tok = Token::new(TokenType::MINUS, self.ch.to_string(), self.line_column),
+            '+' => tok = Token::new(TokenType::Plus, self.line_column),
+            '-' => tok = Token::new(TokenType::MInus, self.line_column),
             '!' => {
                 if self.peek_char() == '=' {
-                    let ch = self.ch;
                     self.read_char();
-                    let mut literal = String::from(ch);
-                    literal.push(self.ch);
-                    tok = Token::new(TokenType::NotEq, literal, self.line_column);
+                    tok = Token::new(TokenType::Neq, self.line_column);
                 } else {
-                    tok = Token::new(TokenType::BANG, self.ch.to_string(), self.line_column);
+                    tok = Token::new(TokenType::Bang, self.line_column);
                 }
             }
             '/' => {
@@ -87,43 +81,41 @@ impl Lexer {
                     self.read_char();
                     return self.next_token();
                 } else {
-                    tok = Token::new(TokenType::SLASH, self.ch.to_string(), self.line_column)
+                    tok = Token {
+                        token_type: TokenType::Slash,
+                        position: self.line_column,
+                    };
                 }
             }
-            '*' => tok = Token::new(TokenType::ASTERISK, self.ch.to_string(), self.line_column),
-            '<' => tok = Token::new(TokenType::LT, self.ch.to_string(), self.line_column),
-            '>' => tok = Token::new(TokenType::GT, self.ch.to_string(), self.line_column),
-            ';' => tok = Token::new(TokenType::SEMICOLON, self.ch.to_string(), self.line_column),
-            ',' => tok = Token::new(TokenType::COMMA, self.ch.to_string(), self.line_column),
-            '(' => tok = Token::new(TokenType::LPAREN, self.ch.to_string(), self.line_column),
-            ')' => tok = Token::new(TokenType::RPAREN, self.ch.to_string(), self.line_column),
-            '{' => tok = Token::new(TokenType::LBRACE, self.ch.to_string(), self.line_column),
-            '}' => tok = Token::new(TokenType::RBRACE, self.ch.to_string(), self.line_column),
+            '*' => tok = Token::new(TokenType::Asterisk, self.line_column),
+            '<' => tok = Token::new(TokenType::Lt, self.line_column),
+            '>' => tok = Token::new(TokenType::Gt, self.line_column),
+            ';' => tok = Token::new(TokenType::SemiColon, self.line_column),
+            ',' => tok = Token::new(TokenType::Comma, self.line_column),
+            '(' => tok = Token::new(TokenType::LeftParan, self.line_column),
+            ')' => tok = Token::new(TokenType::RightParan, self.line_column),
+            '{' => tok = Token::new(TokenType::LeftBrace, self.line_column),
+            '}' => tok = Token::new(TokenType::RightBrace, self.line_column),
             '.' => {
                 if self.peek_char() == '.' {
-                    let ch = self.ch;
                     self.read_char();
-                    let mut literal = String::from(ch);
-                    literal.push(ch);
-                    tok = Token::new(TokenType::Spreed, literal, self.line_column)
+                    tok = Token::new(TokenType::Spreed, self.line_column);
                 } else {
-                    tok = Token::new(TokenType::Dot, self.ch.to_string(), self.line_column)
+                    tok = Token::new(TokenType::Dot, self.line_column)
                 }
             }
-            '\0' => tok.token_type = TokenType::EOF,
+            '\0' => tok.token_type = TokenType::Eof,
             _ => {
                 if is_letter(self.ch) {
-                    tok.literal = self.read_indentifier();
-                    tok.token_type = lookup_ident(&tok.literal);
+                    tok.token_type = lookup_ident(self.read_indentifier());
                     tok.position = (self.line_column.0, self.line_column.1 - 1);
                     return tok;
                 } else if is_digit(self.ch) {
-                    tok.literal = self.read_number();
-                    tok.token_type = TokenType::INT;
+                    tok.token_type = TokenType::Int(self.read_number());
                     tok.position = (self.line_column.0, self.line_column.1 - 1);
                     return tok;
                 } else {
-                    tok = Token::new(TokenType::ILLEGAL, self.ch.to_string(), self.line_column)
+                    tok = Token::new(TokenType::Illegal, self.line_column)
                 }
             }
         }
@@ -133,7 +125,7 @@ impl Lexer {
     }
 
     fn skip_whitespace(&mut self) {
-        while ['\t', '\r', ' '].contains(&self.ch) {
+        while ['\t', '\r', ' '].contaIns(&self.ch) {
             self.read_char()
         }
     }
@@ -158,7 +150,7 @@ impl Lexer {
             self.read_char();
         }
 
-        self.input[position..self.position].to_string()
+        self.Input[position..self.position].to_strIng()
     }
 
     fn read_number(&mut self) -> String {
@@ -167,7 +159,7 @@ impl Lexer {
             self.read_char();
         }
 
-        self.input[position..self.position].to_string()
+        self.Input[position..self.position].to_strIng()
     }
 }
 

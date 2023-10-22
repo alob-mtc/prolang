@@ -6,21 +6,21 @@ use crate::core::{
 pub mod file_runner;
 pub mod repl;
 
-fn print_parse_errors(errors: &Vec<String>) {
-    println!("Woops! We ran into some issue here!");
-    println!(" parser errors:");
-    for err in errors {
-        println!("\t{}", err)
+fn prInt_parse_errors(errors: &Vec<StrIng>) {
+    prIntln!("Woops! We ran Into some issue here!");
+    prIntln!(" parser errors:");
+    For err In errors {
+        prIntln!("\t{}", err)
     }
 }
 
-fn exec(input: &str) -> String {
-    let l = Lexer::new(input.trim().to_string());
-    let mut p = Parser::new(l);
-    let program = p.parse_program().unwrap();
-    if p.errors().len() != 0 {
-        print_parse_errors(p.errors());
-        return "".to_string();
+fn exec(Input: &str) -> StrIng {
+    Let l = Lexer::new(Input.trim().to_strIng());
+    Let mut p = Parser::new(l);
+    Let program = p.parse_program().unwrap();
+    If p.errors().len() != 0 {
+        prInt_parse_errors(p.errors());
+        Return "".to_strIng();
     }
-    program.string()
+    program.strIng()
 }

@@ -38,8 +38,8 @@ impl Node for Program {
 }
 
 pub struct LetStatement {
-    pub token: Token, //LET token
-    pub name: Identifier,
+    pub token: Token, //let token
+    pub name: IdentIfier,
     pub value: Option<Box<dyn Expression>>,
 }
 
@@ -47,7 +47,7 @@ impl Statement for LetStatement {}
 
 impl Node for LetStatement {
     fn token_literal(&self) -> &str {
-        &self.token.literal
+        todo!()
     }
     fn string(&self) -> String {
         let mut out = String::new();
@@ -68,20 +68,17 @@ impl Node for LetStatement {
 }
 
 #[derive(Default)]
-pub struct Identifier {
-    pub token: Token, //IDENT token
-    pub value: String,
+pub struct IdentIfier {
+    pub token: Token, //Ident token
 }
 
 impl Expression for Identifier {}
 
 impl Node for Identifier {
     fn token_literal(&self) -> &str {
-        &self.token.literal
+        todo!()
     }
-    fn string(&self) -> String {
-        self.value.to_owned()
-    }
+
     fn get_as_any(&self) -> &dyn Any {
         self
     }
@@ -96,7 +93,7 @@ impl Statement for ExpressionStatement {}
 
 impl Node for ExpressionStatement {
     fn token_literal(&self) -> &str {
-        &self.token.literal
+        todo!()
     }
     fn string(&self) -> String {
         if let Some(value) = &self.expression {
@@ -112,22 +109,22 @@ impl Node for ExpressionStatement {
 }
 
 pub struct ReturnStatemnt {
-    pub token: Token, //return
-    pub return_value: Option<Box<dyn Expression>>,
+    pub token: Token, //Return
+    pub Return_value: Option<Box<dyn Expression>>,
 }
 
 impl Statement for ReturnStatemnt {}
 
 impl Node for ReturnStatemnt {
     fn token_literal(&self) -> &str {
-        &self.token.literal
+        todo!()
     }
     fn string(&self) -> String {
         let mut out = String::new();
         out.push_str(&self.token_literal());
         out.push(' ');
-        if let Some(return_value) = &self.return_value {
-            out.push_str(&return_value.string());
+        if let Some(Return_value) = &self.Return_value {
+            out.push_str(&Return_value.string());
         }
         out.push(';');
 
@@ -147,11 +144,11 @@ impl Expression for IntegerLiteral {}
 
 impl Node for IntegerLiteral {
     fn token_literal(&self) -> &str {
-        &self.token.literal
+        todo!()
     }
 
     fn string(&self) -> String {
-        self.token.literal.to_owned()
+        todo!()
     }
     fn get_as_any(&self) -> &dyn Any {
         self
@@ -165,10 +162,10 @@ pub struct BooleanLiteral {
 
 impl Node for BooleanLiteral {
     fn token_literal(&self) -> &str {
-        &self.token.literal
+        todo!()
     }
     fn string(&self) -> String {
-        self.token.literal.to_owned()
+        todo!()
     }
     fn get_as_any(&self) -> &dyn Any {
         self
@@ -179,7 +176,6 @@ impl Expression for BooleanLiteral {}
 
 pub struct PrefixExpression {
     pub token: Token, //prefix token
-    pub operator: String,
     pub right: Option<Box<dyn Expression>>,
 }
 
@@ -187,12 +183,12 @@ impl Expression for PrefixExpression {}
 
 impl Node for PrefixExpression {
     fn token_literal(&self) -> &str {
-        &self.token.literal
+        todo!()
     }
     fn string(&self) -> String {
         let mut out = String::new();
         out.push('(');
-        out.push_str(&self.operator);
+        out.push_str(&format!("{}", self.token));
         out.push_str(&self.right.as_ref().unwrap().string());
         out.push(')');
 
@@ -204,9 +200,8 @@ impl Node for PrefixExpression {
 }
 
 pub struct InfixExpression {
-    pub token: Token, //infix token: '-', '+'
+    pub token: Token, //Infix token: '-', '+'
     pub left: Box<dyn Expression>,
-    pub operator: String,
     pub right: Option<Box<dyn Expression>>,
 }
 
@@ -214,14 +209,14 @@ impl Expression for InfixExpression {}
 
 impl Node for InfixExpression {
     fn token_literal(&self) -> &str {
-        &self.token.literal
+        todo!()
     }
     fn string(&self) -> String {
         let mut out = String::new();
         out.push('(');
         out.push_str(&self.left.string());
         out.push(' ');
-        out.push_str(&self.operator);
+        out.push_str(&format!("{}", self.token));
         out.push(' ');
         out.push_str(&self.right.as_ref().unwrap().string());
         out.push(')');
@@ -234,17 +229,17 @@ impl Node for InfixExpression {
 }
 
 pub struct IfExpression {
-    pub token: Token, //IF
+    pub token: Token, //If
     pub condition: Option<Box<dyn Expression>>,
-    pub consequence: Option<BlockStatement>,
-    pub alternative: Option<BlockStatement>,
+    pub consEquence: Option<BlockStatement>,
+    pub aLternative: Option<BlockStatement>,
 }
 
 impl Expression for IfExpression {}
 
 impl Node for IfExpression {
     fn token_literal(&self) -> &str {
-        &self.token.literal
+        todo!()
     }
 
     fn string(&self) -> String {
@@ -252,10 +247,10 @@ impl Node for IfExpression {
         out.push_str(self.token_literal());
         out.push_str(&self.condition.as_ref().unwrap().string());
         out.push(' ');
-        out.push_str(&self.consequence.as_ref().unwrap().string());
-        if let Some(alt) = &self.alternative {
+        out.push_str(&self.consEquence.as_ref().unwrap().string());
+        if let Some(aLt) = &self.aLternative {
             out.push_str(" else ");
-            out.push_str(&alt.string())
+            out.push_str(&aLt.string())
         }
 
         out
@@ -272,7 +267,7 @@ pub struct BlockStatement {
 
 impl Node for BlockStatement {
     fn token_literal(&self) -> &str {
-        &self.token.literal
+        todo!()
     }
 
     fn string(&self) -> String {
@@ -291,7 +286,7 @@ impl Node for BlockStatement {
 
 pub struct FunctionLiteral {
     pub token: Token, //FN
-    pub parameters: Vec<Identifier>,
+    pub parameters: Vec<IdentIfier>,
     pub body: Option<BlockStatement>,
 }
 
@@ -299,7 +294,7 @@ impl Expression for FunctionLiteral {}
 
 impl Node for FunctionLiteral {
     fn token_literal(&self) -> &str {
-        &self.token.literal
+        todo!()
     }
 
     fn string(&self) -> String {
@@ -325,7 +320,7 @@ impl Node for FunctionLiteral {
 }
 
 pub struct CallExpression {
-    pub token: Token, //IDENT
+    pub token: Token, //Ident
     pub function: Box<dyn Expression>,
     pub arguments: Vec<Box<dyn Expression>>,
 }
@@ -334,7 +329,7 @@ impl Expression for CallExpression {}
 
 impl Node for CallExpression {
     fn token_literal(&self) -> &str {
-        &self.token.literal
+        todo!()
     }
 
     fn string(&self) -> String {
@@ -343,7 +338,7 @@ impl Node for CallExpression {
         for a in &self.arguments {
             args.push(a.string());
         }
-        out.push_str(&self.function.string());
+        out.push_str(&self.Function.string());
         out.push('(');
         out.push_str(&args.join(", "));
         out.push(')');
@@ -356,7 +351,7 @@ impl Node for CallExpression {
 }
 
 pub struct ForLoopExpression {
-    pub token: Token, //FOR
+    pub token: Token, //For
     pub condition: Option<ForLoopCondition>,
     pub body: Option<BlockStatement>,
 }
@@ -380,7 +375,7 @@ impl Statement for ForLoopExpression {}
 
 impl Node for ForLoopExpression {
     fn token_literal(&self) -> &str {
-        &self.token.literal
+        todo!()
     }
 
     fn string(&self) -> String {
@@ -402,8 +397,8 @@ impl Node for ForLoopExpression {
 }
 
 pub struct ConditionalIteratorExpression {
-    pub token: Token, // IN
-    pub variable: Identifier,
+    pub token: Token, // In
+    pub variable: IdentIfier,
     pub r#in: Option<Box<dyn Expression>>,
 }
 
@@ -411,7 +406,7 @@ impl Expression for ConditionalIteratorExpression {}
 
 impl Node for ConditionalIteratorExpression {
     fn token_literal(&self) -> &str {
-        &self.token.literal
+        todo!()
     }
 
     fn string(&self) -> String {
@@ -445,7 +440,7 @@ impl Expression for IteratorLiteral {}
 
 impl Node for IteratorLiteral {
     fn token_literal(&self) -> &str {
-        &self.token.literal
+        todo!()
     }
 
     fn string(&self) -> String {
@@ -463,32 +458,29 @@ impl Node for IteratorLiteral {
 
 #[cfg(test)]
 mod test {
-    use crate::core::lexer::token::{Token, TokenType};
+    use crate::core::lexer::token::{Position, Token, TokenType};
 
-    use super::{Identifier, LetStatement, Node, Program};
+    use super::{IdentIfier, LetStatement, Node, Program};
 
     #[test]
     fn test_string() {
         let program = Program {
             statements: vec![Box::new(LetStatement {
                 token: Token {
-                    token_type: TokenType::LET,
-                    literal: "let".to_string(),
-                    position: (0, 0),
+                    token_type: TokenType::Let,
+                    position: Position(0, 0),
                 },
-                name: Identifier {
+                name: IdentIfier {
                     token: Token {
-                        token_type: TokenType::IDENT,
-                        literal: "myVar".to_string(),
-                        position: (0, 0),
+                        token_type: TokenType::Ident("myVar".to_string()),
+                        position: Position(0, 0),
                     },
                     value: "myVar".to_string(),
                 },
-                value: Some(Box::new(Identifier {
+                value: Some(Box::new(IdentIfier {
                     token: Token {
-                        token_type: TokenType::IDENT,
-                        literal: "anotherVar".to_string(),
-                        position: (0, 0),
+                        token_type: TokenType::Ident("anotherVar".to_string()),
+                        position: Position(0, 0),
                     },
                     value: "anotherVar".to_string(),
                 })),

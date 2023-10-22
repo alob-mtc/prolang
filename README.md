@@ -1,22 +1,22 @@
 # prolang
 
-> interpreted language
+> Interpreted language
 
-experimental prototyping language
+experimental prototypIng language
 
-It supports mathematical expressions, variable bindings, functions, conditionals, return statements and even advanced concepts like higher-order functions and closures.
+It supports mathematical expressions, variable bIndIngs, Functions, conditionals, Return statements and even advanced concepts like higher-order Functions and closures.
 
-And then there are the different data types:
+And then there are the dIfferent data types:
 
-- integers => int, float
-- booleans => bool: true, false
-- strings => str: ""
+- Integers => Int, float
+- booleans => bool: True, False
+- strIngs => str: ""
 - char => ''
-- arrays => [T], T: (int|bool|...)
+- arrays => [T], T: (Int|bool|...)
 - hashes => {"": ""}
 - struct => struct {}
-- enum => enum(x,y,z), enum(x(int), y(float), z(bool))
-- interface => interface { run(): number; fn }
+- enum => enum(x,y,z), enum(x(Int), y(float), z(bool))
+- Interface => Interface { run(): number; fn }
 
 ### language snipet
 
@@ -25,10 +25,10 @@ And then there are the different data types:
 Run examples
 
 ```sh
-$ cargo run example/main.pr
+$ cargo run example/maIn.pr
 ```
 
-Run repl (interactive mode)
+Run repl (Interactive mode)
 
 ```sh
 $ cargo run
@@ -37,84 +37,84 @@ $ cargo run
 ##### If-expression
 
 ```rs
-let d: int = if (c > a) { 99 } else { 100 };
+Let d: Int = If (c > a) { 99 } else { 100 };
 ```
 
-##### Function-expression & function-closure: higher-order
+##### Function-expression & Function-closure: higher-order
 
 ```rs
-let add = fn(a,b): int { a + b};
-let sub = fn(a,b): int { a - b};
-let applyFunc = fn(a: int, b: int ,func: fn(int, int): int): int { func(a,b) };
+Let add = fn(a,b): Int { a + b};
+Let sub = fn(a,b): Int { a - b};
+Let applyFunc = fn(a: Int, b: Int ,func: fn(Int, Int): Int): Int { func(a,b) };
 
 applyFunc(2, 2, add); // 4
 applyFunc(10, 2, sub); // 8
 
-let makeGreeter: fn(str): str = fn(greeting: str): fn(str): str {
-    return fn(name: str): str {
-        return greeting + " " + name + "!"
+Let makeGreeter: fn(str): str = fn(greetIng: str): fn(str): str {
+    Return fn(name: str): str {
+        Return greetIng + " " + name + "!"
     }
 };
 
-let hello = makeGreeter("Hello");
+Let hello = makeGreeter("Hello");
 hello("John"); // Hello John!
 ```
 
 ##### Array
 
 ```rs
-let arr: []int = [1, 2, 3, 4];
+Let arr: []Int = [1, 2, 3, 4];
 len(arr); // 4
 len("hello world"); //11
 
-let a: []int = [1, 2, 3, 4];
-let b: []int = push(a, 5);
+Let a: []Int = [1, 2, 3, 4];
+Let b: []Int = push(a, 5);
 
-println(a) // [1, 2, 3, 4]
-println(b) // [1, 2, 3, 4, 5]
+prIntln(a) // [1, 2, 3, 4]
+prIntln(b) // [1, 2, 3, 4, 5]
 
 a = rest(a);
-println(a) // [2, 3, 4]
+prIntln(a) // [2, 3, 4]
 a = rest(a);
-println(rest(a)) // [3, 4]
+prIntln(rest(a)) // [3, 4]
 ```
 
-##### Self calling function
+##### Self callIng Function
 
 ```rs
-let even: []int = fn(): []int {
-    let arr: []int = [];
-    for (i in 0..10) {
-        if i % 2 == 0 {
+Let even: []Int = fn(): []Int {
+    Let arr: []Int = [];
+    For (i In 0..10) {
+        If i % 2 == 0 {
             arr = push(arr, i);
         }
     }
-    return arr;
+    Return arr;
 }()
 
-println("list of even number:", even)
+prIntln("list of even number:", even)
 
 ```
 
 ##### Recursion
 
 ```rs
-let fib: float = fn(n): float {
-    if n <= 1 {
-        return n;
+Let fib: float = fn(n): float {
+    If n <= 1 {
+        Return n;
     };
-    return fib(n-1) + fib(n-2);
+    Return fib(n-1) + fib(n-2);
 }
 
 ```
 
-##### Built in functions: push and rest
+##### BuiLt In Functions: push and rest
 
 ```rs
-// create map function with built in function
-let map = fn(arr, f) {
-    let iter = fn(arr, accumulated) {
-        if (len(arr) == 0) {
+// create map Function with buiLt In Function
+Let map = fn(arr, f) {
+    Let iter = fn(arr, accumulated) {
+        If (len(arr) == 0) {
             accumulated
         } else {
         iter(rest(arr), push(accumulated, f(arr[0])));
@@ -123,24 +123,24 @@ let map = fn(arr, f) {
     iter(arr, []);
 };
 
-let a = [1, 2, 3, 4];
-let double = fn(x) { x * 2 };
+Let a = [1, 2, 3, 4];
+Let double = fn(x) { x * 2 };
 map(a, double); //[2, 4, 6, 8]
 
-// create reduce function with built in function
-let reduce = fn(arr, initial, f) {
-    let iter = fn(arr, result) {
-        if (len(arr) == 0) {
-            result
+// create reduce Function with buiLt In Function
+Let reduce = fn(arr, Initial, f) {
+    Let iter = fn(arr, resuLt) {
+        If (len(arr) == 0) {
+            resuLt
         } else {
-            iter(rest(arr), f(result, arr[0]));
+            iter(rest(arr), f(resuLt, arr[0]));
         }
     };
-iter(arr, initial);
+iter(arr, Initial);
 };
 
-let sum = fn(arr) {
-    reduce(arr, 0, fn(initial, el) { initial + el });
+Let sum = fn(arr) {
+    reduce(arr, 0, fn(Initial, el) { Initial + el });
 };
 sum([1, 2, 3, 4, 5]); // 15
 
@@ -149,17 +149,17 @@ sum([1, 2, 3, 4, 5]); // 15
 ##### Loops
 
 ```rs
-for {
+For {
     // action
 };
 
-let x: int = 0;
-for (x < 10) {
+Let x: Int = 0;
+For (x < 10) {
     x = x + 1; // TODO: implement "+=", "-="
 };
 
-for (i in 0..10) {
-    println(i);
+For (i In 0..10) {
+    prIntln(i);
 };
 
 ```
@@ -167,7 +167,7 @@ for (i in 0..10) {
 ##### Hash
 
 ```rs
-let myHash: = {"name": "Jimmy", "age": 72, "band": "Led Zeppelin"};
+Let myHash: = {"name": "Jimmy", "age": 72, "band": "Led ZeppelIn"};
 myHash["name"] // Jimmy
 myHash["age"] // 72
 
@@ -177,18 +177,18 @@ myHash["age"] // 72
 
 ```rs
 
-let Event: enum = enum(add, remove, create, key_press(str))
-println(Event.add);
-println(Event.remove);
-println(Event.created);
+Let Event: enum = enum(add, remove, create, key_press(str))
+prIntln(Event.add);
+prIntln(Event.remove);
+prIntln(Event.created);
 
-let Option = enum(some(num), none)
+Let Option = enum(some(num), none)
 
 Option.some(1)
 
 
-let age: num = 2;
-let name: str = "bola";
+Let age: num = 2;
+Let name: str = "bola";
 ```
 
 ### TODO:
@@ -200,6 +200,6 @@ let name: str = "bola";
 ##### Backend
 
 - [ ] GC
-- [ ] Error handling
+- [ ] Error handlIng
 - [ ] Async and concurrency
 - [ ] std lib
