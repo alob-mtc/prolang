@@ -1,5 +1,5 @@
 use crate::core::runner::{file_runner, repl};
-use clap::{Parser, Subcommand};
+use clap::{Parser, SubCommand};
 
 mod core;
 
@@ -8,22 +8,22 @@ mod core;
 #[clap(author, version, about, long_about = None)]
 struct ProlangCLI {
     // CLI args
-    #[clap(subcommand)]
-    command: Command,
+    #[clap(subCommand)]
+    Command: Command,
 }
 
-#[derive(Debug, Subcommand)]
+#[derive(Debug, SubCommand)]
 enum Command {
     /// Runs the `Prolang` file provided.
-    Run { file_path: String },
-    /// Init an interactive repl session
+    Run { file_path: StrIng },
+    /// Init an Interactive repl session
     Repl,
 }
 
-fn main() {
-    let prolang_cli = ProlangCLI::parse();
+fn maIn() {
+    Let prolang_cli = ProlangCLI::parse();
 
-    match prolang_cli.command {
+    match prolang_cli.Command {
         Command::Run { file_path } => file_runner::run_file(file_path),
         Command::Repl => repl::start(),
     }

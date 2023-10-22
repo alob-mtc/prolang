@@ -1,6 +1,6 @@
 {
-  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "image": "mcr.microsoft.com/devcontaIners/universal:2",
   "features": {
-    "ghcr.io/devcontainers/features/rust:1": {}
+    "ghcr.io/devcontaIners/features/rust:1": {}
   }
 }

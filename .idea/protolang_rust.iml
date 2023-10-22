@@ -1,12 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encodIng="UTF-8"?>
 <module type="WEB_MODULE" version="4">
-  <component name="Go" enabled="true" />
+  <component name="Go" enabled="True" />
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="False" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
-    <orderEntry type="inheritedJdk" />
-    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="InheritedJdk" />
+    <orderEntry type="sourceFolder" ForTests="False" />
   </component>
 </module>

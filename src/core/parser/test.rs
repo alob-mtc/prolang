@@ -5,7 +5,7 @@ use crate::core::{
     parser::{
         ast::{
             BooleanLiteral, CallExpression, ConditionalIteratorExpression, Expression,
-            ExpressionStatement, ForLoopCondition, ForLoopExpression, FunctionLiteral, Identifier,
+            ExpressionStatement, ForLoopCondition, ForLoopExpression, FunctionLiteral, IdentIfier,
             IfExpression, InfixExpression, IntegerLiteral, IteratorLiteral, LetStatement, Node,
             PrefixExpression, Statement,
         },
@@ -15,145 +15,145 @@ use crate::core::{
 };
 
 #[test]
-fn test_let_statement() {
-    let input = String::from(
+fn test_Let_statement() {
+    Let Input = StrIng::from(
         "
-        let x = 5;
-        let y = 10;
-        let foobar = 838383;
+        Let x = 5;
+        Let y = 10;
+        Let foobar = 838383;
         ",
     );
 
-    let l = Lexer::new(input);
-    let mut p = Parser::new(l);
+    Let l = Lexer::new(Input);
+    Let mut p = Parser::new(l);
 
-    let program = p.parse_program().expect("parse_program() return some");
-    assert_eq!(chack_parser_errors(&p), false);
-    assert_eq!(
+    Let program = p.parse_program().expect("parse_program() Return some");
+    assert_Eq!(chack_parser_errors(&p), False);
+    assert_Eq!(
         program.statements.len(),
         3,
-        "program.statements does not contain 3 statements. got={}",
+        "program.statements does not contaIn 3 statements. got={}",
         program.statements.len()
     );
 
     struct TestCase {
-        expected_identifier: String,
+        expected_IdentIfier: StrIng,
     }
 
-    let tests = [
+    Let tests = [
         TestCase {
-            expected_identifier: String::from("x"),
+            expected_IdentIfier: StrIng::from("x"),
         },
         TestCase {
-            expected_identifier: String::from("y"),
+            expected_IdentIfier: StrIng::from("y"),
         },
         TestCase {
-            expected_identifier: String::from("foobar"),
+            expected_IdentIfier: StrIng::from("foobar"),
         },
     ];
 
-    let mut i = 0;
-    for tt in tests {
-        let stmt = program.statements.get(i).unwrap();
-        let_statemnt(stmt, &tt.expected_identifier);
+    Let mut i = 0;
+    For tt In tests {
+        Let stmt = program.statements.get(i).unwrap();
+        Let_statemnt(stmt, &tt.expected_IdentIfier);
         i += 1;
     }
 }
 
 #[test]
-fn test_let_statements() {
+fn test_Let_statements() {
     struct TestCase<'a> {
-        input: String,
-        expected_identifier: String,
+        Input: StrIng,
+        expected_IdentIfier: StrIng,
         expected_value: &'a dyn Any,
     }
 
-    let tests = [
+    Let tests = [
         TestCase {
-            input: String::from("let x = 5;"),
-            expected_identifier: String::from("x"),
+            Input: StrIng::from("Let x = 5;"),
+            expected_IdentIfier: StrIng::from("x"),
             expected_value: &"y",
         },
         TestCase {
-            input: String::from("let y = true;"),
-            expected_identifier: String::from("y"),
+            Input: StrIng::from("Let y = True;"),
+            expected_IdentIfier: StrIng::from("y"),
             expected_value: &"y",
         },
     ];
 
-    for tt in tests {
-        let l = Lexer::new(tt.input);
-        let mut p = Parser::new(l);
+    For tt In tests {
+        Let l = Lexer::new(tt.Input);
+        Let mut p = Parser::new(l);
 
-        let program = p.parse_program().expect("parse_program() not return none");
-        assert_eq!(chack_parser_errors(&p), false);
-        assert_eq!(
+        Let program = p.parse_program().expect("parse_program() not Return none");
+        assert_Eq!(chack_parser_errors(&p), False);
+        assert_Eq!(
             program.statements.len(),
             1,
-            "program.statements does not contain 1 statements. got={}",
+            "program.statements does not contaIn 1 statements. got={}",
             program.statements.len()
         );
 
-        let stmt = program.statements.get(0).unwrap();
-        let_statemnt(stmt, &tt.expected_identifier);
-        let let_exp = get_of_type::<LetStatement>(stmt.get_as_any()).unwrap();
+        Let stmt = program.statements.get(0).unwrap();
+        Let_statemnt(stmt, &tt.expected_IdentIfier);
+        Let Let_exp = get_of_type::<LetStatement>(stmt.get_as_any()).unwrap();
 
         test_literal_expression(
-            &Box::new(let_exp.value.as_ref().unwrap().as_ref()),
+            &Box::new(Let_exp.value.as_ref().unwrap().as_ref()),
             tt.expected_value,
         );
     }
 }
 
 #[test]
-fn test_return_statement() {
-    let input = String::from(
+fn test_Return_statement() {
+    Let Input = StrIng::from(
         "
-        return 5;
-        return 10;
-        return 993322;
+        Return 5;
+        Return 10;
+        Return 993322;
         ",
     );
 
-    let l = Lexer::new(input);
-    let mut p = Parser::new(l);
+    Let l = Lexer::new(Input);
+    Let mut p = Parser::new(l);
 
-    let program = p.parse_program().expect("parse_program() not return none");
-    assert_eq!(chack_parser_errors(&p), false);
-    assert_eq!(
+    Let program = p.parse_program().expect("parse_program() not Return none");
+    assert_Eq!(chack_parser_errors(&p), False);
+    assert_Eq!(
         program.statements.len(),
         3,
-        "program.statements does not contain 3 statements. got={}",
+        "program.statements does not contaIn 3 statements. got={}",
         program.statements.len()
     );
 
-    for stmt in program.statements {
-        assert_eq!(
+    For stmt In program.statements {
+        assert_Eq!(
             stmt.token_literal(),
-            "return",
-            "return_stmt.token_literal not 'return', got {}",
+            "Return",
+            "Return_stmt.token_literal not 'Return', got {}",
             stmt.token_literal()
         )
     }
 }
 
 #[test]
-fn test_identifier_expression() {
-    let input = String::from("foobar;");
+fn test_IdentIfier_expression() {
+    Let Input = StrIng::from("foobar;");
 
-    let l = Lexer::new(input);
-    let mut p = Parser::new(l);
-    let program = p.parse_program().expect("parse_program() return some");
+    Let l = Lexer::new(Input);
+    Let mut p = Parser::new(l);
+    Let program = p.parse_program().expect("parse_program() Return some");
 
-    assert_eq!(chack_parser_errors(&p), false);
-    assert_eq!(
+    assert_Eq!(chack_parser_errors(&p), False);
+    assert_Eq!(
         program.statements.len(),
         1,
-        "program.statements does not contain 3 statements. got={}",
+        "program.statements does not contaIn 3 statements. got={}",
         program.statements.len()
     );
 
-    let stmt = get_of_type::<ExpressionStatement>(
+    Let stmt = get_of_type::<ExpressionStatement>(
         program
             .statements
             .leak()
@@ -163,46 +163,48 @@ fn test_identifier_expression() {
     )
     .expect("program.Statements[0] is ast.ExpressionStatement");
 
-    let ident = match &stmt.expression {
-        Some(ident) => match get_of_type::<Identifier>(ident.get_as_any()) {
-            Some(ident) => ident,
-            _ => panic!("exp is not Identifier"),
+    Let Ident = match &stmt.expression {
+        Some(Ident) => match get_of_type::<IdentIfier>(Ident.get_as_any()) {
+            Some(Ident) => Ident,
+            _ => panic!("exp is not IdentIfier"),
         },
         _ => panic!("exp is none"),
     };
 
-    assert_eq!(
-        ident.value, "foobar",
-        "ident.value not {}. got={}",
-        "foobar", ident.value
+    assert_Eq!(
+        Ident.value,
+        "foobar",
+        "Ident.value not {}. got={}",
+        "foobar",
+        Ident.value
     );
 
-    assert_eq!(
-        ident.token_literal(),
+    assert_Eq!(
+        Ident.token_literal(),
         "foobar",
-        "ident.token_literal not {}. got={}",
+        "Ident.token_literal not {}. got={}",
         "foobar",
-        ident.token_literal()
+        Ident.token_literal()
     )
 }
 
 #[test]
-fn test_integer_literal_expression() {
-    let input = String::from("5;");
+fn test_Integer_literal_expression() {
+    Let Input = StrIng::from("5;");
 
-    let l = Lexer::new(input);
-    let mut p = Parser::new(l);
-    let program = p.parse_program().expect("parse_program() return some");
+    Let l = Lexer::new(Input);
+    Let mut p = Parser::new(l);
+    Let program = p.parse_program().expect("parse_program() Return some");
 
-    assert_eq!(chack_parser_errors(&p), false);
-    assert_eq!(
+    assert_Eq!(chack_parser_errors(&p), False);
+    assert_Eq!(
         program.statements.len(),
         1,
-        "program.statements does not contain 1 statements. got={}",
+        "program.statements does not contaIn 1 statements. got={}",
         program.statements.len()
     );
 
-    let stmt = get_of_type::<ExpressionStatement>(
+    Let stmt = get_of_type::<ExpressionStatement>(
         program
             .statements
             .leak()
@@ -212,46 +214,48 @@ fn test_integer_literal_expression() {
     )
     .expect("program.Statements[0] is ast.ExpressionStatement");
 
-    let ident = match &stmt.expression {
-        Some(ident) => match get_of_type::<IntegerLiteral>(ident.get_as_any()) {
-            Some(ident) => ident,
-            _ => panic!("exp is not Identifier"),
+    Let Ident = match &stmt.expression {
+        Some(Ident) => match get_of_type::<IntegerLiteral>(Ident.get_as_any()) {
+            Some(Ident) => Ident,
+            _ => panic!("exp is not IdentIfier"),
         },
         _ => panic!("exp is none"),
     };
 
-    assert_eq!(
-        ident.value, 5,
-        "ident.value not {}. got={}",
-        "foobar", ident.value
+    assert_Eq!(
+        Ident.value,
+        5,
+        "Ident.value not {}. got={}",
+        "foobar",
+        Ident.value
     );
 
-    assert_eq!(
-        ident.token_literal(),
+    assert_Eq!(
+        Ident.token_literal(),
         "5",
-        "ident.token_literal not {}. got={}",
+        "Ident.token_literal not {}. got={}",
         "foobar",
-        ident.token_literal()
+        Ident.token_literal()
     )
 }
 
 #[test]
-fn test_if_expression() {
-    let input = String::from("if (x < y) { x } else {}");
+fn test_If_expression() {
+    Let Input = StrIng::from("If (x < y) { x } else {}");
 
-    let l = Lexer::new(input);
-    let mut p = Parser::new(l);
-    let program = p.parse_program().expect("parse_program() return some");
+    Let l = Lexer::new(Input);
+    Let mut p = Parser::new(l);
+    Let program = p.parse_program().expect("parse_program() Return some");
 
-    assert_eq!(chack_parser_errors(&p), false);
-    assert_eq!(
+    assert_Eq!(chack_parser_errors(&p), False);
+    assert_Eq!(
         program.statements.len(),
         1,
-        "program.statements does not contain 1 statements. got={}",
+        "program.statements does not contaIn 1 statements. got={}",
         program.statements.len()
     );
 
-    let stmt = get_of_type::<ExpressionStatement>(
+    Let stmt = get_of_type::<ExpressionStatement>(
         program
             .statements
             .leak()
@@ -261,25 +265,25 @@ fn test_if_expression() {
     )
     .expect("program.Statements[0] is ast.ExpressionStatement");
 
-    let ifexp = match &stmt.expression {
-        Some(ifexp) => match get_of_type::<IfExpression>(ifexp.get_as_any()) {
-            Some(ifexp) => ifexp,
+    Let Ifexp = match &stmt.expression {
+        Some(Ifexp) => match get_of_type::<IfExpression>(Ifexp.get_as_any()) {
+            Some(Ifexp) => Ifexp,
             _ => panic!("exp is not If expression"),
         },
         _ => panic!("exp is none"),
     };
 
-    test_infix_expression(ifexp.condition.as_ref().unwrap(), &"x", "<", &"y");
-    assert_eq!(
-        ifexp.consequence.as_ref().unwrap().statements.len(),
+    test_Infix_expression(Ifexp.condition.as_ref().unwrap(), &"x", "<", &"y");
+    assert_Eq!(
+        Ifexp.consEquence.as_ref().unwrap().statements.len(),
         1,
-        "consequence is not 1 statements. got={}",
-        ifexp.consequence.as_ref().unwrap().statements.len()
+        "consEquence is not 1 statements. got={}",
+        Ifexp.consEquence.as_ref().unwrap().statements.len()
     );
 
-    let consequence = get_of_type::<ExpressionStatement>(
-        ifexp
-            .consequence
+    Let consEquence = get_of_type::<ExpressionStatement>(
+        Ifexp
+            .consEquence
             .as_ref()
             .unwrap()
             .statements
@@ -289,34 +293,34 @@ fn test_if_expression() {
     )
     .expect("statements[0] is ast.ExpressionStatement");
 
-    test_identifier(
-        &Box::new(consequence.expression.as_ref().unwrap().as_ref()),
+    test_IdentIfier(
+        &Box::new(consEquence.expression.as_ref().unwrap().as_ref()),
         "x",
     );
-    assert_eq!(
-        ifexp.alternative.is_some(),
-        true,
-        "alternative was not some.",
+    assert_Eq!(
+        Ifexp.aLternative.is_some(),
+        True,
+        "aLternative was not some.",
     )
 }
 
 #[test]
-fn test_for_expression_type_loop_parsing() {
-    let input = String::from("for { x + y; }");
+fn test_For_expression_type_loop_parsIng() {
+    Let Input = StrIng::from("For { x + y; }");
 
-    let l = Lexer::new(input);
-    let mut p = Parser::new(l);
-    let program = p.parse_program().expect("parse_program() return some");
+    Let l = Lexer::new(Input);
+    Let mut p = Parser::new(l);
+    Let program = p.parse_program().expect("parse_program() Return some");
 
-    assert_eq!(chack_parser_errors(&p), false);
-    assert_eq!(
+    assert_Eq!(chack_parser_errors(&p), False);
+    assert_Eq!(
         program.statements.len(),
         1,
-        "program.statements does not contain 1 statements. got={}",
+        "program.statements does not contaIn 1 statements. got={}",
         program.statements.len()
     );
 
-    let stmt = get_of_type::<ForLoopExpression>(
+    Let stmt = get_of_type::<ForLoopExpression>(
         program
             .statements
             .leak()
@@ -344,30 +348,30 @@ fn test_for_expression_type_loop_parsing() {
             .get_as_any(),
     ) {
         Some(body_stmt) => match &body_stmt.expression {
-            Some(exp) => test_infix_expression(exp, &"x", "+", &"y"),
-            _ => panic!("for-loop body stmt is not ast.ExpressionStatement"),
+            Some(exp) => test_Infix_expression(exp, &"x", "+", &"y"),
+            _ => panic!("For-loop body stmt is not ast.ExpressionStatement"),
         },
-        _ => panic!("for-loop body stmt is not ast.ExpressionStatement"),
+        _ => panic!("For-loop body stmt is not ast.ExpressionStatement"),
     }
 }
 
 #[test]
-fn test_for_expression_type_for_parsing() {
-    let input = String::from("for (x < y) { x + y; }");
+fn test_For_expression_type_For_parsIng() {
+    Let Input = StrIng::from("For (x < y) { x + y; }");
 
-    let l = Lexer::new(input);
-    let mut p = Parser::new(l);
-    let program = p.parse_program().expect("parse_program() return some");
+    Let l = Lexer::new(Input);
+    Let mut p = Parser::new(l);
+    Let program = p.parse_program().expect("parse_program() Return some");
 
-    assert_eq!(chack_parser_errors(&p), false);
-    assert_eq!(
+    assert_Eq!(chack_parser_errors(&p), False);
+    assert_Eq!(
         program.statements.len(),
         1,
-        "program.statements does not contain 1 statements. got={}",
+        "program.statements does not contaIn 1 statements. got={}",
         program.statements.len()
     );
 
-    let stmt = get_of_type::<ForLoopExpression>(
+    Let stmt = get_of_type::<ForLoopExpression>(
         program
             .statements
             .leak()
@@ -379,7 +383,7 @@ fn test_for_expression_type_for_parsing() {
 
     match &stmt.condition {
         Some(condition) => match condition {
-            ForLoopCondition::For(condition) => test_infix_expression(condition, &"x", "<", &"y"),
+            ForLoopCondition::For(condition) => test_Infix_expression(condition, &"x", "<", &"y"),
             _ => panic!(),
         },
         None => panic!(),
@@ -395,30 +399,30 @@ fn test_for_expression_type_for_parsing() {
             .get_as_any(),
     ) {
         Some(body_stmt) => match &body_stmt.expression {
-            Some(exp) => test_infix_expression(exp, &"x", "+", &"y"),
-            _ => panic!("for-loop body stmt is not ast.ExpressionStatement"),
+            Some(exp) => test_Infix_expression(exp, &"x", "+", &"y"),
+            _ => panic!("For-loop body stmt is not ast.ExpressionStatement"),
         },
-        _ => panic!("for-loop body stmt is not ast.ExpressionStatement"),
+        _ => panic!("For-loop body stmt is not ast.ExpressionStatement"),
     }
 }
 
 #[test]
-fn test_for_expression_type_forin_parsing() {
-    let input = String::from("for (i in 0..10) { x + y; }");
+fn test_For_expression_type_ForIn_parsIng() {
+    Let Input = StrIng::from("For (i In 0..10) { x + y; }");
 
-    let l = Lexer::new(input);
-    let mut p = Parser::new(l);
-    let program = p.parse_program().expect("parse_program() return some");
+    Let l = Lexer::new(Input);
+    Let mut p = Parser::new(l);
+    Let program = p.parse_program().expect("parse_program() Return some");
 
-    assert_eq!(chack_parser_errors(&p), false);
-    assert_eq!(
+    assert_Eq!(chack_parser_errors(&p), False);
+    assert_Eq!(
         program.statements.len(),
         1,
-        "program.statements does not contain 1 statements. got={}",
+        "program.statements does not contaIn 1 statements. got={}",
         program.statements.len()
     );
 
-    let stmt = get_of_type::<ForLoopExpression>(
+    Let stmt = get_of_type::<ForLoopExpression>(
         program
             .statements
             .leak()
@@ -448,10 +452,10 @@ fn test_for_expression_type_forin_parsing() {
             .get_as_any(),
     ) {
         Some(body_stmt) => match &body_stmt.expression {
-            Some(exp) => test_infix_expression(exp, &"x", "+", &"y"),
-            _ => panic!("for-loop body stmt is not ast.ExpressionStatement"),
+            Some(exp) => test_Infix_expression(exp, &"x", "+", &"y"),
+            _ => panic!("For-loop body stmt is not ast.ExpressionStatement"),
         },
-        _ => panic!("for-loop body stmt is not ast.ExpressionStatement"),
+        _ => panic!("For-loop body stmt is not ast.ExpressionStatement"),
     }
 }
 
@@ -459,8 +463,8 @@ fn test_conditional_iter_expression(condition: &Box<&dyn Expression>) {
     match get_of_type::<ConditionalIteratorExpression>(condition.get_as_any()) {
         Some(condition) => {
             test_literal_expression(&Box::new(&condition.variable), &"i");
-            match &condition.r#in {
-                Some(r#in) => match get_of_type::<IteratorLiteral>(r#in.get_as_any()) {
+            match &condition.r#In {
+                Some(r#In) => match get_of_type::<IteratorLiteral>(r#In.get_as_any()) {
                     Some(iter) => {
                         test_literal_expression(&Box::new(iter.start.as_ref()), &"0");
                         test_literal_expression(
@@ -468,9 +472,9 @@ fn test_conditional_iter_expression(condition: &Box<&dyn Expression>) {
                             &"10",
                         )
                     }
-                    None => panic!("conditional not iteraltor literal"),
+                    None => panic!("conditional not iteraLtor literal"),
                 },
-                None => panic!("condition iter does not have in expression"),
+                None => panic!("condition iter does not have In expression"),
             }
         }
         None => todo!(),
@@ -478,22 +482,22 @@ fn test_conditional_iter_expression(condition: &Box<&dyn Expression>) {
 }
 
 #[test]
-fn test_function_literal_parsing() {
-    let input = String::from("fn(x, y) { x + y; }");
+fn test_Function_literal_parsIng() {
+    Let Input = StrIng::from("fn(x, y) { x + y; }");
 
-    let l = Lexer::new(input);
-    let mut p = Parser::new(l);
-    let program = p.parse_program().expect("parse_program() return some");
+    Let l = Lexer::new(Input);
+    Let mut p = Parser::new(l);
+    Let program = p.parse_program().expect("parse_program() Return some");
 
-    assert_eq!(chack_parser_errors(&p), false);
-    assert_eq!(
+    assert_Eq!(chack_parser_errors(&p), False);
+    assert_Eq!(
         program.statements.len(),
         1,
-        "program.statements does not contain 1 statements. got={}",
+        "program.statements does not contaIn 1 statements. got={}",
         program.statements.len()
     );
 
-    let stmt = get_of_type::<ExpressionStatement>(
+    Let stmt = get_of_type::<ExpressionStatement>(
         program
             .statements
             .leak()
@@ -503,7 +507,7 @@ fn test_function_literal_parsing() {
     )
     .expect("program.Statements[0] is ast.ExpressionStatement");
 
-    let fn_literal = match &stmt.expression {
+    Let fn_literal = match &stmt.expression {
         Some(fn_literal) => match get_of_type::<FunctionLiteral>(fn_literal.get_as_any()) {
             Some(fn_literal) => fn_literal,
             _ => panic!("exp is not If expression"),
@@ -511,15 +515,15 @@ fn test_function_literal_parsing() {
         _ => panic!("exp is none"),
     };
 
-    assert_eq!(
+    assert_Eq!(
         fn_literal.parameters.len(),
         2,
-        "function literal parameters wrong. want 2, got={}",
+        "Function literal parameters wrong. want 2, got={}",
         fn_literal.parameters.len()
     );
 
-    let x = &Box::new(fn_literal.parameters.get(0).unwrap() as &dyn Expression);
-    let y = &Box::new(fn_literal.parameters.get(1).unwrap() as &dyn Expression);
+    Let x = &Box::new(fn_literal.parameters.get(0).unwrap() as &dyn Expression);
+    Let y = &Box::new(fn_literal.parameters.get(1).unwrap() as &dyn Expression);
 
     test_literal_expression(x, &"x");
     test_literal_expression(y, &"y");
@@ -535,49 +539,49 @@ fn test_function_literal_parsing() {
             .get_as_any(),
     ) {
         Some(body_stmt) => match &body_stmt.expression {
-            Some(exp) => test_infix_expression(exp, &"x", "+", &"y"),
-            _ => panic!("function body stmt is not ast.ExpressionStatement"),
+            Some(exp) => test_Infix_expression(exp, &"x", "+", &"y"),
+            _ => panic!("Function body stmt is not ast.ExpressionStatement"),
         },
-        _ => panic!("function body stmt is not ast.ExpressionStatement"),
+        _ => panic!("Function body stmt is not ast.ExpressionStatement"),
     }
 }
 
 #[test]
-fn test_function_parameter_parsing() {
+fn test_Function_parameter_parsIng() {
     struct TestCase {
-        input: String,
-        expected_params: Vec<String>,
+        Input: StrIng,
+        expected_params: Vec<StrIng>,
     }
 
-    let tests = [
+    Let tests = [
         TestCase {
-            input: String::from("fn() {};"),
+            Input: StrIng::from("fn() {};"),
             expected_params: vec![],
         },
         TestCase {
-            input: String::from("fn(x) {};"),
-            expected_params: vec![String::from("x")],
+            Input: StrIng::from("fn(x) {};"),
+            expected_params: vec![StrIng::from("x")],
         },
         TestCase {
-            input: String::from("fn(x, y, z) {};"),
-            expected_params: vec![String::from("x"), String::from("y"), String::from("z")],
+            Input: StrIng::from("fn(x, y, z) {};"),
+            expected_params: vec![StrIng::from("x"), StrIng::from("y"), StrIng::from("z")],
         },
     ];
 
-    for tt in tests {
-        let l = Lexer::new(tt.input);
-        let mut p = Parser::new(l);
-        let program = p.parse_program().expect("parse_program() return some");
+    For tt In tests {
+        Let l = Lexer::new(tt.Input);
+        Let mut p = Parser::new(l);
+        Let program = p.parse_program().expect("parse_program() Return some");
 
-        assert_eq!(chack_parser_errors(&p), false);
-        assert_eq!(
+        assert_Eq!(chack_parser_errors(&p), False);
+        assert_Eq!(
             program.statements.len(),
             1,
-            "program.statements does not contain 1 statements. got={}",
+            "program.statements does not contaIn 1 statements. got={}",
             program.statements.len()
         );
 
-        let stmt = get_of_type::<ExpressionStatement>(
+        Let stmt = get_of_type::<ExpressionStatement>(
             program
                 .statements
                 .leak()
@@ -587,7 +591,7 @@ fn test_function_parameter_parsing() {
         )
         .expect("program.Statements[0] is ast.ExpressionStatement");
 
-        let fn_literal = match &stmt.expression {
+        Let fn_literal = match &stmt.expression {
             Some(fn_literal) => match get_of_type::<FunctionLiteral>(fn_literal.get_as_any()) {
                 Some(fn_literal) => fn_literal,
                 _ => panic!("exp is not If expression"),
@@ -595,38 +599,38 @@ fn test_function_parameter_parsing() {
             _ => panic!("exp is none"),
         };
 
-        assert_eq!(
+        assert_Eq!(
             fn_literal.parameters.len(),
             tt.expected_params.len(),
-            "function literal parameters wrong. want {}, got={}",
+            "Function literal parameters wrong. want {}, got={}",
             tt.expected_params.len(),
             fn_literal.parameters.len()
         );
 
-        for (i, ident) in tt.expected_params.iter().enumerate() {
-            let p = &Box::new(fn_literal.parameters.get(i).unwrap() as &dyn Expression);
-            test_literal_expression(p, ident);
+        For (i, Ident) In tt.expected_params.iter().enumerate() {
+            Let p = &Box::new(fn_literal.parameters.get(i).unwrap() as &dyn Expression);
+            test_literal_expression(p, Ident);
         }
     }
 }
 
 #[test]
-fn test_call_expression_parsing() {
-    let input = String::from("add(1, 2 * 3, 4 + 5)");
+fn test_call_expression_parsIng() {
+    Let Input = StrIng::from("add(1, 2 * 3, 4 + 5)");
 
-    let l = Lexer::new(input);
-    let mut p = Parser::new(l);
-    let program = p.parse_program().expect("parse_program() return some");
+    Let l = Lexer::new(Input);
+    Let mut p = Parser::new(l);
+    Let program = p.parse_program().expect("parse_program() Return some");
 
-    assert_eq!(chack_parser_errors(&p), false);
-    assert_eq!(
+    assert_Eq!(chack_parser_errors(&p), False);
+    assert_Eq!(
         program.statements.len(),
         1,
-        "program.statements does not contain 1 statements. got={}",
+        "program.statements does not contaIn 1 statements. got={}",
         program.statements.len()
     );
 
-    let stmt = get_of_type::<ExpressionStatement>(
+    Let stmt = get_of_type::<ExpressionStatement>(
         program
             .statements
             .leak()
@@ -636,7 +640,7 @@ fn test_call_expression_parsing() {
     )
     .expect("program.Statements[0] is ast.ExpressionStatement");
 
-    let exp = match &stmt.expression {
+    Let exp = match &stmt.expression {
         Some(exp) => match get_of_type::<CallExpression>(exp.get_as_any()) {
             Some(exp) => exp,
             _ => panic!("exp is not If expression"),
@@ -644,64 +648,64 @@ fn test_call_expression_parsing() {
         _ => panic!("exp is none"),
     };
 
-    test_identifier(&Box::new(exp.function.as_ref()), "add");
+    test_IdentIfier(&Box::new(exp.Function.as_ref()), "add");
 
-    assert_eq!(
+    assert_Eq!(
         exp.arguments.len(),
         3,
         "wrong legnth of arg. go={}",
         exp.arguments.len()
     );
     test_literal_expression(&Box::new(exp.arguments.get(0).unwrap().as_ref()), &1);
-    test_infix_expression(exp.arguments.get(1).as_ref().unwrap(), &2, "*", &3);
-    test_infix_expression(exp.arguments.get(2).as_ref().unwrap(), &4, "+", &5);
+    test_Infix_expression(exp.arguments.get(1).as_ref().unwrap(), &2, "*", &3);
+    test_Infix_expression(exp.arguments.get(2).as_ref().unwrap(), &4, "+", &5);
 }
 
 #[test]
-fn test_parsing_prefix_expression() {
+fn test_parsIng_prefix_expression() {
     struct TestCase<'a> {
-        input: String,
-        operator: String,
-        integer_value: &'a dyn Any,
+        Input: StrIng,
+        operator: StrIng,
+        Integer_value: &'a dyn Any,
     }
 
-    let tests = [
+    Let tests = [
         TestCase {
-            input: String::from("!5"),
-            operator: String::from("!"),
-            integer_value: &5,
+            Input: StrIng::from("!5"),
+            operator: StrIng::from("!"),
+            Integer_value: &5,
         },
         TestCase {
-            input: String::from("-15"),
-            operator: String::from("-"),
-            integer_value: &15,
+            Input: StrIng::from("-15"),
+            operator: StrIng::from("-"),
+            Integer_value: &15,
         },
         TestCase {
-            input: String::from("!true"),
-            operator: String::from("!"),
-            integer_value: &true,
+            Input: StrIng::from("!True"),
+            operator: StrIng::from("!"),
+            Integer_value: &True,
         },
         TestCase {
-            input: String::from("!false"),
-            operator: String::from("!"),
-            integer_value: &false,
+            Input: StrIng::from("!False"),
+            operator: StrIng::from("!"),
+            Integer_value: &False,
         },
     ];
 
-    for tt in tests {
-        let l = Lexer::new(tt.input);
-        let mut p = Parser::new(l);
-        let program = p.parse_program().expect("parse_program() return some");
+    For tt In tests {
+        Let l = Lexer::new(tt.Input);
+        Let mut p = Parser::new(l);
+        Let program = p.parse_program().expect("parse_program() Return some");
 
-        assert_eq!(chack_parser_errors(&p), false);
-        assert_eq!(
+        assert_Eq!(chack_parser_errors(&p), False);
+        assert_Eq!(
             program.statements.len(),
             1,
-            "program.statements does not contain 1 statements. got={}",
+            "program.statements does not contaIn 1 statements. got={}",
             program.statements.len()
         );
 
-        let stmt = get_of_type::<ExpressionStatement>(
+        Let stmt = get_of_type::<ExpressionStatement>(
             program
                 .statements
                 .get(0)
@@ -710,119 +714,121 @@ fn test_parsing_prefix_expression() {
         )
         .expect("program.Statements[0] is ast.ExpressionStatement");
 
-        let exp = match &stmt.expression {
+        Let exp = match &stmt.expression {
             Some(exp) => match get_of_type::<PrefixExpression>(exp.get_as_any()) {
                 Some(exp) => exp,
-                _ => panic!("exp is not Identifier"),
+                _ => panic!("exp is not IdentIfier"),
             },
             _ => panic!("exp is none"),
         };
 
-        assert_eq!(
-            exp.operator, tt.operator,
-            "ident.value not {}. got={}",
-            tt.operator, exp.operator
+        assert_Eq!(
+            exp.operator,
+            tt.operator,
+            "Ident.value not {}. got={}",
+            tt.operator,
+            exp.operator
         );
 
         test_literal_expression(
             &Box::new(exp.right.as_ref().unwrap().as_ref()),
-            tt.integer_value,
+            tt.Integer_value,
         );
     }
 }
 
 #[test]
-fn test_parsing_infix_expression() {
+fn test_parsIng_Infix_expression() {
     struct TestCase<'a> {
-        input: String,
+        Input: StrIng,
         left_value: &'a dyn Any,
-        operator: String,
+        operator: StrIng,
         right_value: &'a dyn Any,
     }
 
-    let tests = [
+    Let tests = [
         TestCase {
-            input: String::from("5 + 5;"),
+            Input: StrIng::from("5 + 5;"),
             left_value: &5,
-            operator: String::from("+"),
+            operator: StrIng::from("+"),
             right_value: &5,
         },
         TestCase {
-            input: String::from("5 - 5;"),
+            Input: StrIng::from("5 - 5;"),
             left_value: &5,
-            operator: String::from("-"),
+            operator: StrIng::from("-"),
             right_value: &5,
         },
         TestCase {
-            input: String::from("5 * 5;"),
+            Input: StrIng::from("5 * 5;"),
             left_value: &5,
-            operator: String::from("*"),
+            operator: StrIng::from("*"),
             right_value: &5,
         },
         TestCase {
-            input: String::from("5 / 5;"),
+            Input: StrIng::from("5 / 5;"),
             left_value: &5,
-            operator: String::from("/"),
+            operator: StrIng::from("/"),
             right_value: &5,
         },
         TestCase {
-            input: String::from("5 > 5;"),
+            Input: StrIng::from("5 > 5;"),
             left_value: &5,
-            operator: String::from(">"),
+            operator: StrIng::from(">"),
             right_value: &5,
         },
         TestCase {
-            input: String::from("5 < 5;"),
+            Input: StrIng::from("5 < 5;"),
             left_value: &5,
-            operator: String::from("<"),
+            operator: StrIng::from("<"),
             right_value: &5,
         },
         TestCase {
-            input: String::from("5 == 5;"),
+            Input: StrIng::from("5 == 5;"),
             left_value: &5,
-            operator: String::from("=="),
+            operator: StrIng::from("=="),
             right_value: &5,
         },
         TestCase {
-            input: String::from("5 != 5;"),
+            Input: StrIng::from("5 != 5;"),
             left_value: &5,
-            operator: String::from("!="),
+            operator: StrIng::from("!="),
             right_value: &5,
         },
         TestCase {
-            input: String::from("true == true;"),
-            left_value: &true,
-            operator: String::from("=="),
-            right_value: &true,
+            Input: StrIng::from("True == True;"),
+            left_value: &True,
+            operator: StrIng::from("=="),
+            right_value: &True,
         },
         TestCase {
-            input: String::from("true != false;"),
-            left_value: &true,
-            operator: String::from("!="),
-            right_value: &false,
+            Input: StrIng::from("True != False;"),
+            left_value: &True,
+            operator: StrIng::from("!="),
+            right_value: &False,
         },
         TestCase {
-            input: String::from("false == false;"),
-            left_value: &false,
-            operator: String::from("=="),
-            right_value: &false,
+            Input: StrIng::from("False == False;"),
+            left_value: &False,
+            operator: StrIng::from("=="),
+            right_value: &False,
         },
     ];
 
-    for tt in tests {
-        let l = Lexer::new(tt.input);
-        let mut p = Parser::new(l);
-        let program = p.parse_program().expect("parse_program() return some");
+    For tt In tests {
+        Let l = Lexer::new(tt.Input);
+        Let mut p = Parser::new(l);
+        Let program = p.parse_program().expect("parse_program() Return some");
 
-        assert_eq!(chack_parser_errors(&p), false);
-        assert_eq!(
+        assert_Eq!(chack_parser_errors(&p), False);
+        assert_Eq!(
             program.statements.len(),
             1,
-            "program.statements does not contain 1 statements. got={}",
+            "program.statements does not contaIn 1 statements. got={}",
             program.statements.len()
         );
 
-        let stmt = get_of_type::<ExpressionStatement>(
+        Let stmt = get_of_type::<ExpressionStatement>(
             program
                 .statements
                 .leak()
@@ -833,196 +839,204 @@ fn test_parsing_infix_expression() {
         .expect("program.Statements[0] is ast.ExpressionStatement");
 
         match &stmt.expression {
-            Some(exp) => test_infix_expression(exp, &tt.left_value, &tt.operator, &tt.right_value),
+            Some(exp) => test_Infix_expression(exp, &tt.left_value, &tt.operator, &tt.right_value),
             _ => panic!("exp is none"),
         };
     }
 }
 
 #[test]
-fn test_operator_precedence_parsing() {
+fn test_operator_precedence_parsIng() {
     struct TestCase {
-        input: String,
-        expected: String,
+        Input: StrIng,
+        expected: StrIng,
     }
 
-    let tests = [
+    Let tests = [
         TestCase {
-            input: String::from("true"),
-            expected: String::from("true"),
+            Input: StrIng::from("True"),
+            expected: StrIng::from("True"),
         },
         TestCase {
-            input: String::from("false"),
-            expected: String::from("false"),
+            Input: StrIng::from("False"),
+            expected: StrIng::from("False"),
         },
         TestCase {
-            input: String::from("3 > 5 == false"),
-            expected: String::from("((3 > 5) == false)"),
+            Input: StrIng::from("3 > 5 == False"),
+            expected: StrIng::from("((3 > 5) == False)"),
         },
         TestCase {
-            input: String::from("3 < 5 == true"),
-            expected: String::from("((3 < 5) == true)"),
+            Input: StrIng::from("3 < 5 == True"),
+            expected: StrIng::from("((3 < 5) == True)"),
         },
         TestCase {
-            input: String::from("-a * b"),
-            expected: String::from("((-a) * b)"),
+            Input: StrIng::from("-a * b"),
+            expected: StrIng::from("((-a) * b)"),
         },
         TestCase {
-            input: String::from("!-a"),
-            expected: String::from("(!(-a))"),
+            Input: StrIng::from("!-a"),
+            expected: StrIng::from("(!(-a))"),
         },
         TestCase {
-            input: String::from("a + b + c"),
-            expected: String::from("((a + b) + c)"),
+            Input: StrIng::from("a + b + c"),
+            expected: StrIng::from("((a + b) + c)"),
         },
         TestCase {
-            input: String::from("a + b - c"),
-            expected: String::from("((a + b) - c)"),
+            Input: StrIng::from("a + b - c"),
+            expected: StrIng::from("((a + b) - c)"),
         },
         TestCase {
-            input: String::from("a * b * c"),
-            expected: String::from("((a * b) * c)"),
+            Input: StrIng::from("a * b * c"),
+            expected: StrIng::from("((a * b) * c)"),
         },
         TestCase {
-            input: String::from("a * b / c"),
-            expected: String::from("((a * b) / c)"),
+            Input: StrIng::from("a * b / c"),
+            expected: StrIng::from("((a * b) / c)"),
         },
         TestCase {
-            input: String::from("a + b / c"),
-            expected: String::from("(a + (b / c))"),
+            Input: StrIng::from("a + b / c"),
+            expected: StrIng::from("(a + (b / c))"),
         },
         TestCase {
-            input: String::from("a + b * c + d / e - f"),
-            expected: String::from("(((a + (b * c)) + (d / e)) - f)"),
+            Input: StrIng::from("a + b * c + d / e - f"),
+            expected: StrIng::from("(((a + (b * c)) + (d / e)) - f)"),
         },
         TestCase {
-            input: String::from("3 + 4; -5 * 5"),
-            expected: String::from("(3 + 4)((-5) * 5)"),
+            Input: StrIng::from("3 + 4; -5 * 5"),
+            expected: StrIng::from("(3 + 4)((-5) * 5)"),
         },
         TestCase {
-            input: String::from("5 > 4 == 3 < 4"),
-            expected: String::from("((5 > 4) == (3 < 4))"),
+            Input: StrIng::from("5 > 4 == 3 < 4"),
+            expected: StrIng::from("((5 > 4) == (3 < 4))"),
         },
         TestCase {
-            input: String::from("5 < 4 != 3 > 4"),
-            expected: String::from("((5 < 4) != (3 > 4))"),
+            Input: StrIng::from("5 < 4 != 3 > 4"),
+            expected: StrIng::from("((5 < 4) != (3 > 4))"),
         },
         TestCase {
-            input: String::from("3 + 4 * 5 == 3 * 1 + 4 * 5"),
-            expected: String::from("((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"),
+            Input: StrIng::from("3 + 4 * 5 == 3 * 1 + 4 * 5"),
+            expected: StrIng::from("((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"),
         },
         TestCase {
-            input: String::from("3 + 4 * 5 == 3 * 1 + 4 * 5"),
-            expected: String::from("((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"),
+            Input: StrIng::from("3 + 4 * 5 == 3 * 1 + 4 * 5"),
+            expected: StrIng::from("((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"),
         },
         TestCase {
-            input: String::from("1 + (2 + 3) + 4"),
-            expected: String::from("((1 + (2 + 3)) + 4)"),
+            Input: StrIng::from("1 + (2 + 3) + 4"),
+            expected: StrIng::from("((1 + (2 + 3)) + 4)"),
         },
         TestCase {
-            input: String::from("(5 + 5) * 2"),
-            expected: String::from("((5 + 5) * 2)"),
+            Input: StrIng::from("(5 + 5) * 2"),
+            expected: StrIng::from("((5 + 5) * 2)"),
         },
         TestCase {
-            input: String::from("2 / (5 + 5)"),
-            expected: String::from("(2 / (5 + 5))"),
+            Input: StrIng::from("2 / (5 + 5)"),
+            expected: StrIng::from("(2 / (5 + 5))"),
         },
         TestCase {
-            input: String::from("-(5 + 5)"),
-            expected: String::from("(-(5 + 5))"),
+            Input: StrIng::from("-(5 + 5)"),
+            expected: StrIng::from("(-(5 + 5))"),
         },
         TestCase {
-            input: String::from("!(true == true)"),
-            expected: String::from("(!(true == true))"),
+            Input: StrIng::from("!(True == True)"),
+            expected: StrIng::from("(!(True == True))"),
         },
         TestCase {
-            input: String::from("a + add(b * c) + d"),
-            expected: String::from("((a + add((b * c))) + d)"),
+            Input: StrIng::from("a + add(b * c) + d"),
+            expected: StrIng::from("((a + add((b * c))) + d)"),
         },
         TestCase {
-            input: String::from("add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))"),
-            expected: String::from("add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))"),
+            Input: StrIng::from("add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))"),
+            expected: StrIng::from("add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))"),
         },
         TestCase {
-            input: String::from("add(a + b + c * d / f + g)"),
-            expected: String::from("add((((a + b) + ((c * d) / f)) + g))"),
+            Input: StrIng::from("add(a + b + c * d / f + g)"),
+            expected: StrIng::from("add((((a + b) + ((c * d) / f)) + g))"),
         },
     ];
 
-    for tt in tests {
-        let l = Lexer::new(tt.input);
-        let mut p = Parser::new(l);
-        let program = p.parse_program().expect("parse_program() return none");
+    For tt In tests {
+        Let l = Lexer::new(tt.Input);
+        Let mut p = Parser::new(l);
+        Let program = p.parse_program().expect("parse_program() Return none");
 
-        assert_eq!(chack_parser_errors(&p), false);
-        let actual = program.string();
-        assert_eq!(
-            actual, tt.expected,
+        assert_Eq!(chack_parser_errors(&p), False);
+        Let actual = program.strIng();
+        assert_Eq!(
+            actual,
+            tt.expected,
             "expected={}, got={}",
-            tt.expected, actual
+            tt.expected,
+            actual
         )
     }
 }
 
 //utils
-fn test_infix_expression(
+fn test_Infix_expression(
     exp: &'static Box<dyn Expression>,
     left: &dyn Any,
     operator: &str,
     right: &dyn Any,
 ) {
-    let op_exp =
+    Let op_exp =
         get_of_type::<InfixExpression>(exp.get_as_any()).expect("exp is OperatorExpression");
     test_literal_expression(&Box::new(op_exp.left.as_ref()), left);
-    assert_eq!(
-        op_exp.operator, operator,
+    assert_Eq!(
+        op_exp.operator,
+        operator,
         "exp.Operator is not {:?}. got={:?}",
-        operator, op_exp.operator
+        operator,
+        op_exp.operator
     );
 
     test_literal_expression(&Box::new(op_exp.right.as_ref().unwrap().as_ref()), right);
 }
 
-fn test_int_literal(il: &Box<&dyn Expression>, value: i64) {
-    let integ = get_of_type::<IntegerLiteral>(il.get_as_any()).expect("il is not IntergerLiteral");
-    assert_eq!(
-        integ.value, value,
-        "integ.value not {}. got={}",
-        value, integ.value
+fn test_Int_literal(il: &Box<&dyn Expression>, value: i64) {
+    Let Integ = get_of_type::<IntegerLiteral>(il.get_as_any()).expect("il is not IntergerLiteral");
+    assert_Eq!(
+        Integ.value,
+        value,
+        "Integ.value not {}. got={}",
+        value,
+        Integ.value
     );
 
-    assert_eq!(
-        integ.token_literal(),
-        value.to_string(),
-        "integ.token_literal not {}. got={}",
+    assert_Eq!(
+        Integ.token_literal(),
+        value.to_strIng(),
+        "Integ.token_literal not {}. got={}",
         value,
-        integ.token_literal()
+        Integ.token_literal()
     )
 }
 
-fn test_identifier(il: &Box<&dyn Expression>, value: &str) {
-    let ident = get_of_type::<Identifier>(il.get_as_any()).expect("il is Identifier");
-    assert_eq!(
-        ident.value, value,
-        "ident.value not {}. got={}",
-        value, ident.value
+fn test_IdentIfier(il: &Box<&dyn Expression>, value: &str) {
+    Let Ident = get_of_type::<IdentIfier>(il.get_as_any()).expect("il is IdentIfier");
+    assert_Eq!(
+        Ident.value,
+        value,
+        "Ident.value not {}. got={}",
+        value,
+        Ident.value
     );
 
-    assert_eq!(
-        ident.token_literal(),
-        value.to_string(),
-        "ident.token_literal not {}. got={}",
+    assert_Eq!(
+        Ident.token_literal(),
+        value.to_strIng(),
+        "Ident.token_literal not {}. got={}",
         value,
-        ident.token_literal()
+        Ident.token_literal()
     )
 }
 
 fn test_boolean_literal(il: &Box<&dyn Expression>, value: bool) {
-    let bo = get_of_type::<BooleanLiteral>(il.get_as_any()).expect("il is Boolean");
-    assert_eq!(bo.value, value, "bo.value not {}. got={}", bo.value, value);
-    assert_eq!(
+    Let bo = get_of_type::<BooleanLiteral>(il.get_as_any()).expect("il is Boolean");
+    assert_Eq!(bo.value, value, "bo.value not {}. got={}", bo.value, value);
+    assert_Eq!(
         bo.token_literal(),
-        value.to_string(),
+        value.to_strIng(),
         "bo.value not {}. got={}",
         bo.value,
         value
@@ -1030,48 +1044,50 @@ fn test_boolean_literal(il: &Box<&dyn Expression>, value: bool) {
 }
 
 fn test_literal_expression(exp: &Box<&dyn Expression>, expected: &dyn Any) {
-    if let Some(value) = expected.downcast_ref::<String>() {
-        test_identifier(exp, value);
-    } else if let Some(&value) = expected.downcast_ref::<i64>() {
-        test_int_literal(exp, value);
-    } else if let Some(&value) = expected.downcast_ref::<bool>() {
+    If Let Some(value) = expected.downcast_ref::<StrIng>() {
+        test_IdentIfier(exp, value);
+    } else If Let Some(&value) = expected.downcast_ref::<i64>() {
+        test_Int_literal(exp, value);
+    } else If Let Some(&value) = expected.downcast_ref::<bool>() {
         test_boolean_literal(exp, value);
     } else {
         dbg!("type of exp not handled.");
     }
 }
 
-fn let_statemnt(s: &Box<dyn Statement>, name: &str) {
-    assert_eq!(
+fn Let_statemnt(s: &Box<dyn Statement>, name: &str) {
+    assert_Eq!(
         s.token_literal(),
-        "let",
-        "s.token_literal not 'let' got={}",
+        "Let",
+        "s.token_literal not 'Let' got={}",
         s.token_literal()
     );
-    let let_stmt = get_of_type::<LetStatement>(s.get_as_any()).unwrap();
-    assert_eq!(
-        let_stmt.name.value, name,
-        "letStmt.Name.Value not '{}'. got={}",
-        name, let_stmt.name.value
+    Let Let_stmt = get_of_type::<LetStatement>(s.get_as_any()).unwrap();
+    assert_Eq!(
+        Let_stmt.name.value,
+        name,
+        "LetStmt.Name.Value not '{}'. got={}",
+        name,
+        Let_stmt.name.value
     );
-    assert_eq!(
-        let_stmt.name.token_literal(),
+    assert_Eq!(
+        Let_stmt.name.token_literal(),
         name,
-        "letStmt.Name.Value not '{}'. got={}",
+        "LetStmt.Name.Value not '{}'. got={}",
         name,
-        let_stmt.name.value
+        Let_stmt.name.value
     )
 }
 
 fn chack_parser_errors(p: &Parser) -> bool {
-    let errs: &Vec<String> = p.errors();
-    if errs.len() == 0 {
-        return false;
+    Let errs: &Vec<StrIng> = p.errors();
+    If errs.len() == 0 {
+        Return False;
     }
-    println!("parser has errors: {}", errs.len());
-    for err in errs {
-        println!("parser error: {}", err)
+    prIntln!("parser has errors: {}", errs.len());
+    For err In errs {
+        prIntln!("parser error: {}", err)
     }
 
-    true
+    True
 }
